@@ -17,3 +17,12 @@ router.get('/', productoControlador.listarProductos);
 
 // Privado (solo vendedor/admin)
 router.post('/', verificarToken, verificarRol(1, 2), productoControlador.crearProducto);
+
+
+// Privado: editar producto
+router.put(
+  '/:cod_producto',
+  verificarToken,
+  verificarRol(1, 2),
+  productoControlador.editarProducto
+);
