@@ -8,11 +8,34 @@ const conexionBD = require('./config/conexionBD');
 // Rutas de usuarios
 const usuarioRutas = require('./routes/usuarioRutas');
 
-// Middleware de autenticación
+// Middleware de autenticación y verificación
 const { verificarToken } = require('./middlewares/authMiddleware');
+const { verificarRol } = require('./middlewares/rolMiddleware');
 
 // Inicialización de la app
 const app = express();
+
+// Ruta de prueba solo para administradores.
+app.get('/api/admin', verificarToken, verificarRol(1), (req, res) => {
+  res.json({
+    mensaje: 'Acceso permitido solo para administrador',
+  });
+});
+
+// Ruta de prueba solo para vendedores.
+app.get('/api/vendedor', verificarToken, verificarRol(2), (req, res) => {
+  res.json({
+    mensaje: 'Acceso permitido solo para vendedor',
+  });
+});
+
+// Ruta de prueba solo para usuarios registrados.
+app.get('/api/registrado', verificarToken, verificarRol(3), (req, res) => {
+  res.json({
+    mensaje: 'Acceso permitido solo para usuario registrado',
+  });
+});
+
 
 // Middleware para permitir JSON y peticiones externas
 app.use(cors());
