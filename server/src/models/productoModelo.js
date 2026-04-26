@@ -100,3 +100,22 @@ module.exports = {
   obtenerProductoPorCodigo,
   actualizarProducto,
 };
+
+
+// Desactiva un producto (borrado lógico)
+const eliminarProducto = async (cod_producto) => {
+  const [resultado] = await conexionBD.query(
+    'UPDATE producto SET activo = FALSE WHERE cod_producto = ?',
+    [cod_producto]
+  );
+
+  return resultado.affectedRows;
+};
+
+module.exports = {
+  crearProducto,
+  obtenerProductos,
+  obtenerProductoPorCodigo,
+  actualizarProducto,
+  eliminarProducto,
+};

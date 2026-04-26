@@ -26,3 +26,11 @@ router.put(
   verificarRol(1, 2),
   productoControlador.editarProducto
 );
+
+// Privado: eliminar producto
+router.delete(
+  '/:cod_producto',
+  verificarToken,
+  verificarRol(1, 2),
+  productoControlador.eliminarProducto
+);
