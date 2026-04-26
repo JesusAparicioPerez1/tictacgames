@@ -22,7 +22,7 @@ app.use(express.json());
 
 // Rutas principales
 app.use('/api/usuarios', usuarioRutas);
-app.use('/api/productos', verificarToken, verificarRol(1, 2), productoRutas);
+app.use('/api/productos', productoRutas);
 
 // Ruta base para comprobar servidor
 app.get('/', (req, res) => {

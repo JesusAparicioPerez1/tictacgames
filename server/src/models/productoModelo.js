@@ -33,3 +33,18 @@ const crearProducto = async (producto) => {
 module.exports = {
   crearProducto,
 };
+
+
+// Obtiene todos los productos activos
+const obtenerProductos = async () => {
+  const [filas] = await conexionBD.query(
+    'SELECT * FROM producto WHERE activo = TRUE'
+  );
+
+  return filas;
+};
+
+module.exports = {
+  crearProducto,
+  obtenerProductos,
+};

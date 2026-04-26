@@ -46,3 +46,23 @@ const crearProducto = async (req, res) => {
 module.exports = {
   crearProducto,
 };
+
+
+// Devuelve lista de productos
+const listarProductos = async (req, res) => {
+  try {
+    const productos = await productoModelo.obtenerProductos();
+
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al obtener productos',
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  crearProducto,
+  listarProductos,
+};
