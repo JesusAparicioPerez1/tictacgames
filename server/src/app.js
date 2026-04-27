@@ -10,6 +10,7 @@ const usuarioRutas = require('./routes/usuarioRutas');
 const productoRutas = require('./routes/productoRutas');
 const categoriaRutas = require('./routes/categoriaRutas');
 const carritoRutas = require('./routes/carritoRutas');
+const pedidoRutas = require('./routes/pedidoRutas');
 
 // Middlewares de autenticación y roles
 const { verificarToken } = require('./middlewares/authMiddleware');
@@ -27,6 +28,7 @@ app.use('/api/usuarios', usuarioRutas);
 app.use('/api/productos', productoRutas);
 app.use('/api/categorias', categoriaRutas);
 app.use('/api/carrito', carritoRutas);
+app.use('/api/pedidos', pedidoRutas);
 
 // Ruta base para comprobar servidor
 app.get('/', (req, res) => {
