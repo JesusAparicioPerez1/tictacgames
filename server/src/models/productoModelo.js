@@ -35,11 +35,24 @@ module.exports = {
 };
 
 
-// Obtiene todos los productos activos
+// Obtiene productos con sus categorías
 const obtenerProductos = async () => {
-  const [filas] = await conexionBD.query(
-    'SELECT * FROM producto WHERE activo = TRUE'
-  );
+  const [filas] = await conexionBD.query(`
+    SELECT 
+      p.cod_producto,
+      p.nombre_producto,
+      p.descripcion_producto,
+      p.precio,
+      p.stock,
+      p.plataforma,
+      p.tipo_producto,
+      GROUP_CONCAT(c.nombre_categoria) AS categorias
+    FROM producto p
+    LEFT JOIN producto_categoria pc ON p.cod_producto = pc.cod_producto
+    LEFT JOIN categoria c ON pc.cod_categoria = c.cod_categoria
+    WHERE p.activo = TRUE
+    GROUP BY p.cod_producto
+  `);
 
   return filas;
 };

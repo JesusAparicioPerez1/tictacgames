@@ -8,6 +8,8 @@ const conexionBD = require('./config/conexionBD');
 // Rutas
 const usuarioRutas = require('./routes/usuarioRutas');
 const productoRutas = require('./routes/productoRutas');
+const categoriaRutas = require('./routes/categoriaRutas');
+const carritoRutas = require('./routes/carritoRutas');
 
 // Middlewares de autenticación y roles
 const { verificarToken } = require('./middlewares/authMiddleware');
@@ -23,6 +25,8 @@ app.use(express.json());
 // Rutas principales
 app.use('/api/usuarios', usuarioRutas);
 app.use('/api/productos', productoRutas);
+app.use('/api/categorias', categoriaRutas);
+app.use('/api/carrito', carritoRutas);
 
 // Ruta base para comprobar servidor
 app.get('/', (req, res) => {
@@ -77,4 +81,7 @@ app.get('/api/registrado', verificarToken, verificarRol(3), (req, res) => {
   });
 });
 
+
 module.exports = app;
+
+

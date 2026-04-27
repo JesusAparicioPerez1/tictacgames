@@ -3,23 +3,20 @@ const productoControlador = require('../controllers/productoControlador');
 const { verificarToken } = require('../middlewares/authMiddleware');
 const { verificarRol } = require('../middlewares/rolMiddleware');
 
-
 const router = express.Router();
 
-// Crear producto
-router.post('/', productoControlador.crearProducto);
-
-module.exports = router;
-
-
-// Obtener productos (público)
+// Público: listar productos
 router.get('/', productoControlador.listarProductos);
 
-// Privado (solo vendedor/admin)
-router.post('/', verificarToken, verificarRol(1, 2), productoControlador.crearProducto);
+// Privado: crear producto solo admin o vendedor
+router.post(
+  '/',
+  verificarToken,
+  verificarRol(1, 2),
+  productoControlador.crearProducto
+);
 
-
-// Privado: editar producto
+// Privado: editar producto solo admin o vendedor
 router.put(
   '/:cod_producto',
   verificarToken,
@@ -27,10 +24,12 @@ router.put(
   productoControlador.editarProducto
 );
 
-// Privado: eliminar producto
+// Privado: eliminar producto solo admin o vendedor
 router.delete(
   '/:cod_producto',
   verificarToken,
   verificarRol(1, 2),
   productoControlador.eliminarProducto
 );
+
+module.exports = router;
