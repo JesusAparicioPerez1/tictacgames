@@ -2,53 +2,76 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 
 function Tienda() {
-    // Estado para guardar los productos obtenidos del backend
-    const [productos, setProductos] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [mensaje, setMensaje] = useState('');
 
-    // Estado para mostrar mensajes de error
-    const [mensaje, setMensaje] = useState('');
-
-    // Se ejecuta al cargar la página para obtener los productos
-    useEffect(() => {
-        const obtenerProductos = async () => {
-            try {
-            // Petición GET al backend
-            const res = await api.get('/productos');
-
-            // Guardamos los productos en el estado
-            setProductos(res.data);
-            } catch (error) {
-                console.error(error);
-                setMensaje('Error al cargar productos');
-            }
-        };
+  useEffect(() => {
+    const obtenerProductos = async () => {
+      try {
+        const res = await api.get('/productos');
+        setProductos(res.data);
+      } catch (error) {
+        console.error(error);
+        setMensaje('Error al cargar productos');
+      }
+    };
 
     obtenerProductos();
-    }, []);
+  }, []);
 
-    return (
-        <main>
-        <h2>Tienda</h2>
+  // Añade producto al carrito
+  const agregarAlCarrito = async (cod_producto) => {
+    try {
+      const token = localStorage.getItem('token');
 
-        {/* Mensaje de error si existe */}
-        {mensaje && <p>{mensaje}</p>}
+      await api.post(
+        '/carrito',
+        {
+          cod_producto,
+          cantidad: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-        <div>
-            {/* Recorremos los productos y los mostramos */}
-            {productos.map((producto) => (
-            <div key={producto.cod_producto}>
-                <h3>{producto.nombre_producto}</h3>
+      setMensaje('Producto añadido al carrito');
+    } catch (error) {
+      console.error(error);
+      setMensaje(
+        error.response?.data?.mensaje || 'Error al añadir al carrito'
+      );
+    }
+  };
 
-                <p>{producto.descripcion_producto}</p>
+  return (
+    <main>
+      <h2>Tienda</h2>
 
-                <p>Precio: {producto.precio} €</p>
+      {mensaje && <p>{mensaje}</p>}
 
-                <p>Categorías: {producto.categorias}</p>
-            </div>
-            ))}
-        </div>
-        </main>
-    );
+      <div>
+        {productos.map((producto) => (
+          <div key={producto.cod_producto}>
+            <h3>{producto.nombre_producto}</h3>
+
+            <p>{producto.descripcion_producto}</p>
+
+            <p>Precio: {producto.precio} €</p>
+
+            <p>Categorías: {producto.categorias}</p>
+
+            {/* BOTÓN CLAVE */}
+            <button onClick={() => agregarAlCarrito(producto.cod_producto)}>
+              Añadir al carrito
+            </button>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
 }
 
 export default Tienda;
