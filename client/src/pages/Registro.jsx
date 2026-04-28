@@ -3,97 +3,97 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 function Registro() {
-  const [formulario, setFormulario] = useState({
-    nombre: '',
-    apellido: '',
-    correo: '',
-    contrasena: '',
-  });
-
-  const [mensaje, setMensaje] = useState('');
-  const navigate = useNavigate();
-
-  // Actualiza los campos del formulario
-  const manejarCambio = (e) => {
-    setFormulario({
-      ...formulario,
-      [e.target.name]: e.target.value,
+    const [formulario, setFormulario] = useState({
+        nombre: '',
+        apellido: '',
+        correo: '',
+        contrasena: '',
     });
-  };
 
-  // Envía los datos de registro al backend
-  const manejarSubmit = async (e) => {
-    e.preventDefault();
+    const [mensaje, setMensaje] = useState('');
+    const navigate = useNavigate();
 
-    try {
-      await api.post('/usuarios/registro', formulario);
+    // Actualiza los campos del formulario
+    const manejarCambio = (e) => {
+        setFormulario({
+        ...formulario,
+        [e.target.name]: e.target.value,
+        });
+    };
 
-      setMensaje('Usuario registrado correctamente');
+    // Envía los datos de registro al backend
+    const manejarSubmit = async (e) => {
+        e.preventDefault();
 
-      setTimeout(() => {
-        navigate('/login');
-      }, 1000);
-    } catch (error) {
-      setMensaje(
-        error.response?.data?.mensaje || 'Error al registrar usuario'
-      );
-    }
-  };
+        try {
+        await api.post('/usuarios/registro', formulario);
 
-  return (
-    <main>
-      <h2>Registro</h2>
+        setMensaje('Usuario registrado correctamente');
 
-      <form onSubmit={manejarSubmit}>
-        <div>
-          <label>Nombre</label>
-          <input
-            type="text"
-            name="nombre"
-            value={formulario.nombre}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
+        setTimeout(() => {
+            navigate('/login');
+        }, 1000);
+        } catch (error) {
+        setMensaje(
+            error.response?.data?.mensaje || 'Error al registrar usuario'
+        );
+        }
+    };
 
-        <div>
-          <label>Apellido</label>
-          <input
-            type="text"
-            name="apellido"
-            value={formulario.apellido}
-            onChange={manejarCambio}
-          />
-        </div>
+    return (
+        <main>
+        <h2>Registro</h2>
 
-        <div>
-          <label>Correo</label>
-          <input
-            type="email"
-            name="correo"
-            value={formulario.correo}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
+        <form onSubmit={manejarSubmit}>
+            <div>
+            <label>Nombre</label>
+            <input
+                type="text"
+                name="nombre"
+                value={formulario.nombre}
+                onChange={manejarCambio}
+                required
+            />
+            </div>
 
-        <div>
-          <label>Contraseña</label>
-          <input
-            type="password"
-            name="contrasena"
-            value={formulario.contrasena}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
+            <div>
+            <label>Apellido</label>
+            <input
+                type="text"
+                name="apellido"
+                value={formulario.apellido}
+                onChange={manejarCambio}
+            />
+            </div>
 
-        <button type="submit">Crear cuenta</button>
-      </form>
+            <div>
+            <label>Correo</label>
+            <input
+                type="email"
+                name="correo"
+                value={formulario.correo}
+                onChange={manejarCambio}
+                required
+            />
+            </div>
 
-      {mensaje && <p>{mensaje}</p>}
-    </main>
-  );
+            <div>
+            <label>Contraseña</label>
+            <input
+                type="password"
+                name="contrasena"
+                value={formulario.contrasena}
+                onChange={manejarCambio}
+                required
+            />
+            </div>
+
+            <button type="submit">Crear cuenta</button>
+        </form>
+
+        {mensaje && <p>{mensaje}</p>}
+        </main>
+    );
 }
 
 export default Registro;
