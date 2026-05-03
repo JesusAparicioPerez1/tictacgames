@@ -20,51 +20,57 @@ function Tienda() {
   }, []);
 
   // Añade producto al carrito
-  const agregarAlCarrito = async (cod_producto) => {
-    try {
-      const token = localStorage.getItem('token');
+    const agregarAlCarrito = async (cod_producto) => {
+      try {
+        const token = localStorage.getItem('token');
 
-      await api.post(
-        '/carrito',
-        {
-          cod_producto,
-          cantidad: 1,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await api.post(
+          '/carrito',
+          {
+            cod_producto,
+            cantidad: 1,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      setMensaje('Producto añadido al carrito');
-    } catch (error) {
-      console.error(error);
-      setMensaje(
-        error.response?.data?.mensaje || 'Error al añadir al carrito'
-      );
-    }
+        setMensaje('Producto añadido al carrito');
+      } catch (error) {
+        console.error(error);
+        setMensaje(
+          error.response?.data?.mensaje || 'Error al añadir al carrito'
+        );
+      }
   };
 
   return (
-    <main>
+  <main>
       <h2>Tienda</h2>
 
       {mensaje && <p>{mensaje}</p>}
 
-      <div>
+      <div className="productos-grid">
         {productos.map((producto) => (
-          <div key={producto.cod_producto}>
+          <div key={producto.cod_producto} className="producto-card">
             <h3>{producto.nombre_producto}</h3>
 
-            <p>{producto.descripcion_producto}</p>
+            <p className="descripcion">
+              {producto.descripcion_producto}
+            </p>
 
-            <p>Precio: {producto.precio} €</p>
+            <p className="precio">{producto.precio} €</p>
 
-            <p>Categorías: {producto.categorias}</p>
+            <p className="categorias">
+              {producto.categorias}
+            </p>
 
-            {/* BOTÓN CLAVE */}
-            <button onClick={() => agregarAlCarrito(producto.cod_producto)}>
+            <button
+              onClick={() => agregarAlCarrito(producto.cod_producto)}
+              className="btn-carrito"
+            >
               Añadir al carrito
             </button>
           </div>
