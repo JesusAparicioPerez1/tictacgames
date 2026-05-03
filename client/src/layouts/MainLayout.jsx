@@ -1,8 +1,10 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { obtenerUsuarioDesdeToken } from '../utils/auth';
 
 function MainLayout() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const usuario = obtenerUsuarioDesdeToken();
 
   // Cierra sesión eliminando el token
   const cerrarSesion = () => {
@@ -24,12 +26,19 @@ function MainLayout() {
 
           {!token ? (
             <>
-              <Link to="/login">Iniciar sesión</Link>
-              <Link to="/registro">Registro</Link>
+                <Link to="/login">Iniciar sesión</Link>
+                <Link to="/registro">Registro</Link>
             </>
-          ) : (
-            <button onClick={cerrarSesion}>Cerrar sesión</button>
-          )}
+            ) : (
+            <>
+                <span>
+                    Bienvenido, {usuario?.cod_rol === 1 && 'Admin'}
+                    {usuario?.cod_rol === 2 && 'Vendedor'}
+                    {usuario?.cod_rol === 3 && 'Usuario'}
+                </span>
+                <button onClick={cerrarSesion}>Cerrar sesión</button>
+            </>
+            )}
         </nav>
       </header>
 
