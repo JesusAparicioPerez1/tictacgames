@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 function Tienda() {
   const [productos, setProductos] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerProductos = async () => {
@@ -20,31 +22,36 @@ function Tienda() {
   }, []);
 
   // Añade producto al carrito
-    const agregarAlCarrito = async (cod_producto) => {
-      try {
-        const token = localStorage.getItem('token');
+  const agregarAlCarrito = async (cod_producto) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
 
-        await api.post(
-          '/carrito',
-          {
-            cod_producto,
-            cantidad: 1,
+    try {
+      await api.post(
+        '/carrito',
+        {
+          cod_producto,
+          cantidad: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        }
+      );
 
-        setMensaje('Producto añadido al carrito');
-      } catch (error) {
-        console.error(error);
-        setMensaje(
-          error.response?.data?.mensaje || 'Error al añadir al carrito'
-        );
-      }
-  };
+      setMensaje('Producto añadido al carrito');
+    } catch (error) {
+      console.error(error);
+      setMensaje(
+        error.response?.data?.mensaje || 'Error al añadir al carrito'
+      );
+    }
+};
 
   return (
   <main>
