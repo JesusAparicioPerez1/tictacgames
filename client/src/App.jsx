@@ -11,10 +11,12 @@ import Registro from './pages/Registro';
 import Tienda from './pages/Tienda';
 import Carrito from './pages/Carrito';
 import Admin from './pages/Admin';
+import Vendedor from './pages/Vendedor';
 
 // Rutas protegidas
 import RutaPrivada from './routes/RutaPrivada';
 import RutaAdmin from './routes/RutaAdmin';
+import RutaVendedor from './routes/RutaVendedor';
 
 function App() {
     return (
@@ -42,12 +44,19 @@ function App() {
             }/>
             {/* Ruta protegida solo accesible por administradores */}
             <Route path="/admin" element={
-                <RutaAdmin>
-                  <Admin />
-                </RutaAdmin>
-              }/>
+              <RutaAdmin>
+                <Admin />
+              </RutaAdmin>
+            }/>
               
           </Route>
+
+            {/* Ruta protegida para vendedores y administradores */}
+          <Route path="/vendedor" element={
+              <RutaVendedor>
+                <Vendedor />
+              </RutaVendedor>
+            }/>
         </Routes>
       </BrowserRouter>
     );

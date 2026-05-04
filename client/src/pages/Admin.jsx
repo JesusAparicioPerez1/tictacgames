@@ -5,39 +5,66 @@ function Admin() {
     // Estado para almacenar los usuarios obtenidos del backend
     const [usuarios, setUsuarios] = useState([]);
 
-    // Estado para mostrar mensajes de error
+    // Estado para mostrar mensajes de éxito o error
     const [mensaje, setMensaje] = useState('');
 
-    // Se ejecuta al cargar la página para obtener los usuarios
-    useEffect(() => {
-        const obtenerUsuarios = async () => {
+    // Obtiene todos los usuarios desde el backend
+    const obtenerUsuarios = async () => {
         try {
-            // Recuperamos el token del usuario autenticado
-            const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token');
 
-            // Petición al backend para obtener todos los usuarios (solo admin)
-            const res = await api.get('/usuarios', {
+        const res = await api.get('/usuarios', {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+
+        setUsuarios(res.data);
+        } catch (error) {
+        console.error(error);
+        setMensaje('Error al cargar usuarios');
+        }
+    };
+
+    // Carga los usuarios al entrar en el panel admin
+    useEffect(() => {
+        const cargarUsuarios = async () => {
+        await obtenerUsuarios();
+    };
+
+    cargarUsuarios();
+    }, []);
+
+    // Cambia el rol de un usuario desde el panel admin
+    const cambiarRol = async (cod_usuario, cod_rol) => {
+        try {
+        const token = localStorage.getItem('token');
+
+        await api.put(
+            `/usuarios/${cod_usuario}/rol`,
+            { cod_rol },
+            {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-            });
+            }
+        );
 
-            // Guardamos los usuarios en el estado
-            setUsuarios(res.data);
-        } catch (error) {
-            console.error(error);
-            setMensaje('Error al cargar usuarios');
-        }
-        };
+        setMensaje('Rol actualizado correctamente');
 
+        // Recarga la lista para reflejar los cambios
         obtenerUsuarios();
-    }, []);
+        } catch (error) {
+        console.error(error);
+        setMensaje('Error al cambiar el rol');
+        }
+    };
 
     return (
         <main>
         <h2>Panel de Administración</h2>
 
-        {/* Mensaje de error */}
+        {/* Mensaje de estado */}
         {mensaje && <p>{mensaje}</p>}
 
         {/* Listado de usuarios */}
@@ -45,8 +72,23 @@ function Admin() {
             {usuarios.map((u) => (
             <div key={u.cod_usuario}>
                 <p>ID: {u.cod_usuario}</p>
+                <p>Nombre: {u.nombre}</p>
                 <p>Correo: {u.correo}</p>
-                <p>Rol: {u.cod_rol}</p>
+                <p>Rol actual: {u.cod_rol}</p>
+                <p>Activo: {u.activo ? 'Sí' : 'No'}</p>
+
+                {/* Botones para cambiar el rol del usuario */}
+                <button onClick={() => cambiarRol(u.cod_usuario, 1)}>
+                Hacer administrador
+                </button>
+
+                <button onClick={() => cambiarRol(u.cod_usuario, 2)}>
+                Hacer vendedor
+                </button>
+
+                <button onClick={() => cambiarRol(u.cod_usuario, 3)}>
+                Hacer usuario
+                </button>
             </div>
             ))}
         </div>
