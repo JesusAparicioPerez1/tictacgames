@@ -1,20 +1,18 @@
 const conexionBD = require('../config/conexionBD');
 
-// Inserta un nuevo producto en la BD
-const crearProducto = async (producto) => {
-  const {
-    nombre_producto,
-    descripcion_producto,
-    precio,
-    stock,
-    tipo_producto,
-    plataforma,
-    cod_vendedor,
-  } = producto;
-
+// Crear producto
+const crearProducto = async ({
+  nombre_producto,
+  descripcion_producto,
+  precio,
+  stock,
+  tipo_producto,
+  plataforma,
+  cod_usuario,
+}) => {
   const [resultado] = await conexionBD.query(
     `INSERT INTO producto 
-    (nombre_producto, descripcion_producto, precio, stock, tipo_producto, plataforma, cod_vendedor)
+    (nombre_producto, descripcion_producto, precio, stock, tipo_producto, plataforma, cod_usuario)
     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       nombre_producto,
@@ -23,19 +21,14 @@ const crearProducto = async (producto) => {
       stock,
       tipo_producto,
       plataforma,
-      cod_vendedor,
+      cod_usuario,
     ]
   );
 
   return resultado.insertId;
 };
 
-module.exports = {
-  crearProducto,
-};
-
-
-// Obtiene productos con sus categorías
+// Obtener productos
 const obtenerProductos = async () => {
   const [filas] = await conexionBD.query(`
     SELECT 
@@ -57,13 +50,7 @@ const obtenerProductos = async () => {
   return filas;
 };
 
-module.exports = {
-  crearProducto,
-  obtenerProductos,
-};
-
-
-// Obtiene un producto por su código
+// Obtener producto por ID
 const obtenerProductoPorCodigo = async (cod_producto) => {
   const [filas] = await conexionBD.query(
     'SELECT * FROM producto WHERE cod_producto = ?',
@@ -73,7 +60,7 @@ const obtenerProductoPorCodigo = async (cod_producto) => {
   return filas[0];
 };
 
-// Actualiza un producto existente
+// Actualizar producto
 const actualizarProducto = async (cod_producto, producto) => {
   const {
     nombre_producto,
@@ -85,14 +72,14 @@ const actualizarProducto = async (cod_producto, producto) => {
   } = producto;
 
   const [resultado] = await conexionBD.query(
-    `UPDATE producto
-     SET nombre_producto = ?,
-         descripcion_producto = ?,
-         precio = ?,
-         stock = ?,
-         tipo_producto = ?,
-         plataforma = ?
-     WHERE cod_producto = ?`,
+    `UPDATE producto SET
+      nombre_producto = ?,
+      descripcion_producto = ?,
+      precio = ?,
+      stock = ?,
+      tipo_producto = ?,
+      plataforma = ?
+    WHERE cod_producto = ?`,
     [
       nombre_producto,
       descripcion_producto,
@@ -107,15 +94,7 @@ const actualizarProducto = async (cod_producto, producto) => {
   return resultado.affectedRows;
 };
 
-module.exports = {
-  crearProducto,
-  obtenerProductos,
-  obtenerProductoPorCodigo,
-  actualizarProducto,
-};
-
-
-// Desactiva un producto (borrado lógico)
+// Eliminar (borrado lógico)
 const eliminarProducto = async (cod_producto) => {
   const [resultado] = await conexionBD.query(
     'UPDATE producto SET activo = FALSE WHERE cod_producto = ?',
@@ -125,10 +104,30 @@ const eliminarProducto = async (cod_producto) => {
   return resultado.affectedRows;
 };
 
+// Obtiene productos de un vendedor concreto
+const obtenerProductosPorUsuario = async (cod_usuario) => {
+  const [filas] = await conexionBD.query(
+    `SELECT 
+      cod_producto,
+      nombre_producto,
+      precio,
+      stock,
+      plataforma,
+      tipo_producto
+     FROM producto
+     WHERE cod_usuario = ? AND activo = TRUE`,
+    [cod_usuario]
+  );
+
+  return filas;
+};
+
+
 module.exports = {
   crearProducto,
   obtenerProductos,
   obtenerProductoPorCodigo,
   actualizarProducto,
   eliminarProducto,
+  obtenerProductosPorUsuario,
 };

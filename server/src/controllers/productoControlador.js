@@ -1,6 +1,6 @@
 const productoModelo = require('../models/productoModelo');
 
-// Crea un producto nuevo
+// Crear producto
 const crearProducto = async (req, res) => {
   try {
     const {
@@ -12,7 +12,7 @@ const crearProducto = async (req, res) => {
       plataforma,
     } = req.body;
 
-    const cod_vendedor = req.usuario.cod_usuario;
+    const cod_usuario = req.usuario.cod_usuario;
 
     if (!nombre_producto || !precio || !tipo_producto || !plataforma) {
       return res.status(400).json({
@@ -27,7 +27,7 @@ const crearProducto = async (req, res) => {
       stock,
       tipo_producto,
       plataforma,
-      cod_vendedor,
+      cod_usuario,
     });
 
     res.status(201).json({
@@ -43,16 +43,10 @@ const crearProducto = async (req, res) => {
   }
 };
 
-module.exports = {
-  crearProducto,
-};
-
-
-// Devuelve lista de productos
+// Listar productos
 const listarProductos = async (req, res) => {
   try {
     const productos = await productoModelo.obtenerProductos();
-
     res.json(productos);
   } catch (error) {
     res.status(500).json({
@@ -62,13 +56,7 @@ const listarProductos = async (req, res) => {
   }
 };
 
-module.exports = {
-  crearProducto,
-  listarProductos,
-};
-
-
-// Edita un producto si el usuario es admin o el vendedor propietario
+// Editar producto
 const editarProducto = async (req, res) => {
   try {
     const { cod_producto } = req.params;
@@ -84,7 +72,7 @@ const editarProducto = async (req, res) => {
     }
 
     const esAdmin = codRol === 1;
-    const esPropietario = producto.cod_vendedor === codUsuario;
+    const esPropietario = producto.cod_usuario === codUsuario;
 
     if (!esAdmin && !esPropietario) {
       return res.status(403).json({
@@ -92,20 +80,12 @@ const editarProducto = async (req, res) => {
       });
     }
 
-    const actualizado = await productoModelo.actualizarProducto(
-      cod_producto,
-      req.body
-    );
-
-    if (!actualizado) {
-      return res.status(400).json({
-        mensaje: 'No se pudo actualizar el producto',
-      });
-    }
+    await productoModelo.actualizarProducto(cod_producto, req.body);
 
     res.json({
       mensaje: 'Producto actualizado correctamente',
     });
+
   } catch (error) {
     res.status(500).json({
       mensaje: 'Error al editar producto',
@@ -114,14 +94,7 @@ const editarProducto = async (req, res) => {
   }
 };
 
-module.exports = {
-  crearProducto,
-  listarProductos,
-  editarProducto,
-};
-
-
-// Elimina (desactiva) un producto
+// Eliminar producto
 const eliminarProducto = async (req, res) => {
   try {
     const { cod_producto } = req.params;
@@ -137,7 +110,7 @@ const eliminarProducto = async (req, res) => {
     }
 
     const esAdmin = codRol === 1;
-    const esPropietario = producto.cod_vendedor === codUsuario;
+    const esPropietario = producto.cod_usuario === codUsuario;
 
     if (!esAdmin && !esPropietario) {
       return res.status(403).json({
@@ -159,9 +132,27 @@ const eliminarProducto = async (req, res) => {
   }
 };
 
+
+// Lista productos del usuario autenticado (vendedor o admin)
+const listarMisProductos = async (req, res) => {
+  try {
+    const cod_usuario = req.usuario.cod_usuario;
+
+    const productos = await productoModelo.obtenerProductosPorUsuario(cod_usuario);
+
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al obtener productos del vendedor',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   crearProducto,
   listarProductos,
   editarProducto,
   eliminarProducto,
+  listarMisProductos,
 };

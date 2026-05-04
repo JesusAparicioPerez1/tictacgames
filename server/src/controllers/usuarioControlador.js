@@ -118,8 +118,32 @@ const listarUsuarios = async (req, res) => {
   }
 };
 
+// Cambia el rol de un usuario (solo accesible por administrador)
+const cambiarRolUsuario = async (req, res) => {
+  try {
+    // ID del usuario a modificar
+    const { cod_usuario } = req.params;
+
+    // Nuevo rol que se quiere asignar
+    const { cod_rol } = req.body;
+
+    // Llamada al modelo para actualizar en BD
+    await usuarioModelo.cambiarRol(cod_usuario, cod_rol);
+
+    res.json({
+      mensaje: 'Rol actualizado correctamente',
+    });
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al cambiar rol',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
   listarUsuarios,
+  cambiarRolUsuario,
 };

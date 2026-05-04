@@ -19,4 +19,12 @@ router.get(
   usuarioControlador.listarUsuarios
 );
 
+// Ruta protegida: solo el administrador puede cambiar roles
+router.put(
+  '/:cod_usuario/rol',
+  verificarToken,     // Usuario autenticado
+  verificarRol(1),    // Solo admin (rol 1)
+  usuarioControlador.cambiarRolUsuario
+);
+
 module.exports = router;

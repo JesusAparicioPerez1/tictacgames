@@ -48,9 +48,22 @@ const obtenerUsuarios = async () => {
   return filas;
 };
 
+// Cambia el rol de un usuario en la base de datos
+// cod_rol: 1 = admin, 2 = vendedor, 3 = usuario
+const cambiarRol = async (cod_usuario, cod_rol) => {
+  const [resultado] = await conexionBD.query(
+    'UPDATE usuario SET cod_rol = ? WHERE cod_usuario = ?',
+    [cod_rol, cod_usuario]
+  );
+
+  // Devuelve el número de filas afectadas
+  return resultado.affectedRows;
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   crearUsuario,
   obtenerUsuarioPorCorreo,
   obtenerUsuarios,
+  cambiarRol,
 };

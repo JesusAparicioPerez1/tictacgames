@@ -8,7 +8,7 @@ const router = express.Router();
 // Público: listar productos
 router.get('/', productoControlador.listarProductos);
 
-// Privado: crear producto solo admin o vendedor
+// Privado: crear producto (admin o vendedor)
 router.post(
   '/',
   verificarToken,
@@ -16,7 +16,7 @@ router.post(
   productoControlador.crearProducto
 );
 
-// Privado: editar producto solo admin o vendedor
+// Privado: editar producto (admin o vendedor)
 router.put(
   '/:cod_producto',
   verificarToken,
@@ -24,12 +24,19 @@ router.put(
   productoControlador.editarProducto
 );
 
-// Privado: eliminar producto solo admin o vendedor
+// Privado: eliminar producto (admin o vendedor)
 router.delete(
   '/:cod_producto',
   verificarToken,
   verificarRol(1, 2),
   productoControlador.eliminarProducto
+);
+
+// Privado: obtener productos del vendedor
+router.get(
+  '/mis-productos',
+  verificarToken,
+  productoControlador.listarMisProductos
 );
 
 module.exports = router;
