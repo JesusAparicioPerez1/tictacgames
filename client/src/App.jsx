@@ -10,7 +10,11 @@ import Login from './pages/Login';
 import Registro from './pages/Registro';
 import Tienda from './pages/Tienda';
 import Carrito from './pages/Carrito';
+import Admin from './pages/Admin';
+
+// Rutas protegidas
 import RutaPrivada from './routes/RutaPrivada';
+import RutaAdmin from './routes/RutaAdmin';
 
 function App() {
     return (
@@ -36,6 +40,13 @@ function App() {
                 <Carrito />
               </RutaPrivada>
             }/>
+            {/* Ruta protegida solo accesible por administradores */}
+            <Route path="/admin" element={
+                <RutaAdmin>
+                  <Admin />
+                </RutaAdmin>
+              }/>
+              
           </Route>
         </Routes>
       </BrowserRouter>
