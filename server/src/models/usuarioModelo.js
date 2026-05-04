@@ -21,7 +21,7 @@ const crearUsuario = async ({ nombre, apellido, correo, contrasenaEncriptada }) 
   return resultado.insertId;
 };
 
-// Devuelve usuario completo por correo (para login)
+// Devuelve usuario completo por correo para login.
 const obtenerUsuarioPorCorreo = async (correo) => {
   const [filas] = await conexionBD.query(
     'SELECT * FROM usuario WHERE correo = ?',
@@ -31,8 +31,26 @@ const obtenerUsuarioPorCorreo = async (correo) => {
   return filas[0];
 };
 
+// Obtiene todos los usuarios para el panel de administración.
+const obtenerUsuarios = async () => {
+  const [filas] = await conexionBD.query(
+    `SELECT 
+      cod_usuario,
+      nombre,
+      apellido,
+      correo,
+      cod_rol,
+      fecha_registro,
+      activo
+    FROM usuario`
+  );
+
+  return filas;
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   crearUsuario,
   obtenerUsuarioPorCorreo,
+  obtenerUsuarios,
 };
