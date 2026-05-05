@@ -60,10 +60,34 @@ const cambiarRol = async (cod_usuario, cod_rol) => {
   return resultado.affectedRows;
 };
 
+// Desactiva un usuario sin eliminarlo físicamente de la base de datos
+const desactivarUsuario = async (cod_usuario) => {
+  const [resultado] = await conexionBD.query(
+    'UPDATE usuario SET activo = FALSE WHERE cod_usuario = ?',
+    [cod_usuario]
+  );
+
+  return resultado.affectedRows;
+};
+
+// Cambia el estado de un usuario.
+// activo = true  -> usuario activo
+// activo = false -> usuario desactivado
+const cambiarEstadoUsuario = async (cod_usuario, activo) => {
+  const [resultado] = await conexionBD.query(
+    'UPDATE usuario SET activo = ? WHERE cod_usuario = ?',
+    [activo, cod_usuario]
+  );
+
+  return resultado.affectedRows;
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   crearUsuario,
   obtenerUsuarioPorCorreo,
   obtenerUsuarios,
   cambiarRol,
+  desactivarUsuario,
+  cambiarEstadoUsuario,
 };

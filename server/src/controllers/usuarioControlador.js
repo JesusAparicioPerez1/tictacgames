@@ -141,9 +141,72 @@ const cambiarRolUsuario = async (req, res) => {
   }
 };
 
+// Desactiva un usuario desde el panel de administración
+const desactivarUsuario = async (req, res) => {
+  try {
+    const { cod_usuario } = req.params;
+
+    const resultado = await usuarioModelo.desactivarUsuario(cod_usuario);
+
+    if (!resultado) {
+      return res.status(404).json({
+        mensaje: 'Usuario no encontrado',
+      });
+    }
+
+    res.json({
+      mensaje: 'Usuario desactivado correctamente',
+    });
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al desactivar usuario',
+      error: error.message,
+    });
+  }
+};
+
+// Cambia el estado de un usuario desde el panel de administración.
+const cambiarEstadoUsuario = async (req, res) => {
+  try {
+    const { cod_usuario } = req.params;
+    const { activo } = req.body;
+
+    // Validamos que el campo activo sea booleano.
+    if (typeof activo !== 'boolean') {
+      return res.status(400).json({
+        mensaje: 'El campo activo debe ser true o false',
+      });
+    }
+
+    const resultado = await usuarioModelo.cambiarEstadoUsuario(
+      cod_usuario,
+      activo
+    );
+
+    if (!resultado) {
+      return res.status(404).json({
+        mensaje: 'Usuario no encontrado',
+      });
+    }
+
+    res.json({
+      mensaje: activo
+        ? 'Usuario activado correctamente'
+        : 'Usuario desactivado correctamente',
+    });
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al cambiar el estado del usuario',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
   listarUsuarios,
+  desactivarUsuario,
   cambiarRolUsuario,
+  cambiarEstadoUsuario,
 };

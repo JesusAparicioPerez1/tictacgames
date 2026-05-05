@@ -27,4 +27,20 @@ router.put(
   usuarioControlador.cambiarRolUsuario
 );
 
+// Ruta protegida: solo el administrador puede desactivar usuarios
+router.put(
+  '/:cod_usuario/desactivar',
+  verificarToken,
+  verificarRol(1),
+  usuarioControlador.desactivarUsuario
+);
+
+// Ruta protegida: solo el administrador puede activar o desactivar usuarios.
+router.put(
+  '/:cod_usuario/estado',
+  verificarToken,
+  verificarRol(1),
+  usuarioControlador.cambiarEstadoUsuario
+);
+
 module.exports = router;
