@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
 
+// Página de catálogo de productos
 function Tienda() {
+  // Lista de productos
   const [productos, setProductos] = useState([]);
-  const [mensaje, setMensaje] = useState('');
-  const navigate = useNavigate();
 
+  // Mensaje de error
+  const [mensaje, setMensaje] = useState('');
+
+  // Obtener productos al cargar la página
   useEffect(() => {
     const obtenerProductos = async () => {
       try {
@@ -21,65 +25,44 @@ function Tienda() {
     obtenerProductos();
   }, []);
 
-  // Añade producto al carrito
-  const agregarAlCarrito = async (cod_producto) => {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      await api.post(
-        '/carrito',
-        {
-          cod_producto,
-          cantidad: 1,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setMensaje('Producto añadido al carrito');
-    } catch (error) {
-      console.error(error);
-      setMensaje(
-        error.response?.data?.mensaje || 'Error al añadir al carrito'
-      );
-    }
-};
-
   return (
-  <main>
+    <main>
       <h2>Tienda</h2>
 
+      {/* Mensaje de error */}
       {mensaje && <p>{mensaje}</p>}
 
+      {/* Grid de productos */}
       <div className="productos-grid">
         {productos.map((producto) => (
           <div key={producto.cod_producto} className="producto-card">
+
+            {/* Nombre del producto */}
             <h3>{producto.nombre_producto}</h3>
 
+            {/* Descripción breve */}
             <p className="descripcion">
               {producto.descripcion_producto}
             </p>
 
-            <p className="precio">{producto.precio} €</p>
-
-            <p className="categorias">
-              {producto.categorias}
+            {/* Precio */}
+            <p className="precio">
+              {producto.precio} €
             </p>
 
-            <button
-              onClick={() => agregarAlCarrito(producto.cod_producto)}
+            {/* Plataforma */}
+            <p className="categorias">
+              {producto.plataforma}
+            </p>
+
+            {/* Enlace al detalle del producto */}
+            <Link
+              to={`/producto/${producto.cod_producto}`}
               className="btn-carrito"
             >
-              Añadir al carrito
-            </button>
+              Ver detalle
+            </Link>
+
           </div>
         ))}
       </div>

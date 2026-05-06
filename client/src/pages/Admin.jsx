@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 
-// Página de administración: gestión de usuarios
-function Admin() {
-    // Estado con la lista de usuarios
+// Panel de administración con pestañas internas:
+// Usuarios | Productos | Plataformas
+    function Admin() {
+    // ===== ESTADO =====
+    // Lista de usuarios
     const [usuarios, setUsuarios] = useState([]);
 
-    // Estado para mostrar mensajes (éxito / error)
+    // Lista de productos (para la pestaña Productos)
+    const [productos, setProductos] = useState([]);
+
+    // Mensajes de estado (éxito/error)
     const [mensaje, setMensaje] = useState('');
 
-    // Obtiene todos los usuarios del backend
+    // Control de la pestaña activa del admin
+    // 'usuarios' | 'productos' | 'plataformas'
+    const [seccionActiva, setSeccionActiva] = useState('usuarios');
+
+    // ===== FUNCIONES USUARIOS =====
+    // Obtener todos los usuarios
     const obtenerUsuarios = async () => {
         try {
         const token = localStorage.getItem('token');
@@ -27,16 +37,7 @@ function Admin() {
         }
     };
 
-    // Carga usuarios al entrar en la página
-    useEffect(() => {
-        const cargarUsuarios = async () => {
-        await obtenerUsuarios();
-        };
-
-        cargarUsuarios();
-    }, []);
-
-    // Cambia el rol de un usuario (admin, vendedor, usuario)
+    // Cambiar rol de usuario
     const cambiarRol = async (cod_usuario, cod_rol) => {
         try {
         const token = localStorage.getItem('token');
@@ -53,7 +54,7 @@ function Admin() {
 
         setMensaje('Rol actualizado correctamente');
 
-        // Refresca lista
+        // Recargar usuarios
         obtenerUsuarios();
         } catch (error) {
         console.error(error);
@@ -61,14 +62,14 @@ function Admin() {
         }
     };
 
-    // Desactiva un usuario (borrado lógico)
-    const desactivarUsuario = async (cod_usuario) => {
+    // Activar o desactivar usuario
+    const cambiarEstadoUsuario = async (cod_usuario, activo) => {
         try {
         const token = localStorage.getItem('token');
 
         await api.put(
-            `/usuarios/${cod_usuario}/desactivar`,
-            {},
+            `/usuarios/${cod_usuario}/estado`,
+            { activo },
             {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -76,16 +77,74 @@ function Admin() {
             }
         );
 
-        setMensaje('Usuario desactivado correctamente');
+        setMensaje(
+            activo
+            ? 'Usuario activado correctamente'
+            : 'Usuario desactivado correctamente'
+        );
 
-        // Refresca lista
+        // Recargar usuarios
         obtenerUsuarios();
         } catch (error) {
         console.error(error);
-        setMensaje('Error al desactivar usuario');
+        setMensaje('Error al cambiar estado del usuario');
         }
     };
 
+    // ===== FUNCIONES PRODUCTOS =====
+    // Obtener productos (para admin)
+    const obtenerProductos = async () => {
+        try {
+        const res = await api.get('/productos');
+        setProductos(res.data);
+        } catch (error) {
+        console.error(error);
+        setMensaje('Error al cargar productos');
+        }
+    };
+
+    // Eliminar producto (admin puede eliminar cualquiera)
+    const eliminarProducto = async (cod_producto) => {
+        try {
+        const token = localStorage.getItem('token');
+
+        await api.delete(`/productos/${cod_producto}`, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+
+        setMensaje('Producto eliminado');
+
+        // Recargar productos
+        obtenerProductos();
+        } catch (error) {
+        console.error(error);
+        setMensaje('Error al eliminar producto');
+        }
+    };
+
+    // ===== EFECTOS =====
+    // Cargar usuarios al entrar
+    useEffect(() => {
+        const cargar = async () => {
+        await obtenerUsuarios();
+        };
+        cargar();
+    }, []);
+
+    // Cargar productos cuando se cambia a la pestaña Productos
+        useEffect(() => {
+        const cargarProductos = async () => {
+            if (seccionActiva === 'productos') {
+        await obtenerProductos();
+        }
+    };
+
+    cargarProductos();
+    }, [seccionActiva]);
+
+    // ===== RENDER =====
     return (
         <main>
         <h2>Panel de Administración</h2>
@@ -93,20 +152,35 @@ function Admin() {
         {/* Mensaje de estado */}
         {mensaje && <p>{mensaje}</p>}
 
-        {/* Listado de usuarios */}
-        <div>
-            {usuarios.map((u) => (
-            <div key={u.cod_usuario} style={{ border: '1px solid #ccc', marginBottom: '10px', padding: '10px' }}>
-                
-                {/* Información del usuario */}
-                <p><strong>ID:</strong> {u.cod_usuario}</p>
-                <p><strong>Nombre:</strong> {u.nombre}</p>
-                <p><strong>Correo:</strong> {u.correo}</p>
-                <p><strong>Rol:</strong> {u.cod_rol}</p>
-                <p><strong>Activo:</strong> {u.activo ? 'Sí' : 'No'}</p>
+        {/* ===== PESTAÑAS ===== */}
+        <div style={{ marginBottom: '20px' }}>
+            <button onClick={() => setSeccionActiva('usuarios')}>
+            Usuarios
+            </button>
 
-                {/* Botones de cambio de rol */}
-                <div>
+            <button onClick={() => setSeccionActiva('productos')}>
+            Productos
+            </button>
+
+            <button onClick={() => setSeccionActiva('plataformas')}>
+            Plataformas
+            </button>
+        </div>
+
+        {/* ===== SECCIÓN USUARIOS ===== */}
+        {seccionActiva === 'usuarios' && (
+            <div>
+            {usuarios.map((u) => (
+                <div
+                key={u.cod_usuario}
+                className="panel-card"
+                >
+                <p><strong>{u.nombre}</strong></p>
+                <p>{u.correo}</p>
+                <p>Rol: {u.cod_rol}</p>
+                <p>Activo: {u.activo ? 'Sí' : 'No'}</p>
+
+                {/* Botones de rol */}
                 <button onClick={() => cambiarRol(u.cod_usuario, 1)}>
                     Admin
                 </button>
@@ -118,18 +192,56 @@ function Admin() {
                 <button onClick={() => cambiarRol(u.cod_usuario, 3)}>
                     Usuario
                 </button>
-                </div>
 
-                {/* Botón de desactivar usuario */}
-                <div style={{ marginTop: '5px' }}>
-                <button onClick={() => desactivarUsuario(u.cod_usuario)}>
-                    Desactivar usuario
+                {/* Botón dinámico activar/desactivar */}
+                {u.activo ? (
+                    <button
+                    onClick={() =>
+                        cambiarEstadoUsuario(u.cod_usuario, false)
+                    }
+                    >
+                    Desactivar
+                    </button>
+                ) : (
+                    <button
+                    onClick={() =>
+                        cambiarEstadoUsuario(u.cod_usuario, true)
+                    }
+                    >
+                    Activar
+                    </button>
+                )}
+                </div>
+            ))}
+            </div>
+        )}
+
+        {/* ===== SECCIÓN PRODUCTOS ===== */}
+        {seccionActiva === 'productos' && (
+            <div>
+            {productos.map((p) => (
+                <div
+                key={p.cod_producto}
+                className="panel-card"
+                >
+                <p><strong>{p.nombre_producto}</strong></p>
+                <p>{p.precio} €</p>
+                <p>{p.plataforma}</p>
+
+                <button onClick={() => eliminarProducto(p.cod_producto)}>
+                    Eliminar
                 </button>
                 </div>
-
-            </div>
             ))}
-        </div>
+            </div>
+        )}
+
+        {/* ===== SECCIÓN PLATAFORMAS ===== */}
+        {seccionActiva === 'plataformas' && (
+            <div>
+            <p>Gestión de plataformas (pendiente)</p>
+            </div>
+        )}
         </main>
     );
 }

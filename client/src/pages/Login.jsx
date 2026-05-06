@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { obtenerUsuarioDesdeToken } from '../utils/auth';
 
 function Login() {
     const [formulario, setFormulario] = useState({
@@ -9,7 +10,9 @@ function Login() {
     });
 
     const [mensaje, setMensaje] = useState('');
+
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Actualiza los campos del formulario
     const manejarCambio = (e) => {
@@ -19,7 +22,7 @@ function Login() {
         });
     };
 
-    // Envía credenciales al backend
+    // Envía los datos al backend y redirige según contexto/rol
     const manejarSubmit = async (e) => {
         e.preventDefault();
 
@@ -28,10 +31,26 @@ function Login() {
 
         localStorage.setItem('token', respuesta.data.token);
 
-        setMensaje('Login correcto');
+        const usuario = obtenerUsuarioDesdeToken();
 
-        navigate('/tienda');
+        // Si venía de una ruta protegida, vuelve allí
+        const rutaAnterior = location.state?.from?.pathname;
+
+        if (rutaAnterior) {
+            navigate(rutaAnterior, { replace: true });
+            return;
+        }
+
+        // Si no venía de ninguna ruta, redirige según rol
+        if (usuario?.cod_rol === 1) {
+            navigate('/admin', { replace: true });
+        } else if (usuario?.cod_rol === 2) {
+            navigate('/vendedor', { replace: true });
+        } else {
+            navigate('/tienda', { replace: true });
+        }
         } catch (error) {
+        console.error(error);
         setMensaje(
             error.response?.data?.mensaje || 'Error al iniciar sesión'
         );
