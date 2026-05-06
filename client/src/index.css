@@ -1,4 +1,4 @@
-/* Reset básico para evitar problemas de tamaños */
+/* Reset básico */
 * {
   box-sizing: border-box;
 }
@@ -26,14 +26,12 @@ button {
 /* NAVBAR */
 /* ========================= */
 
-/* Barra superior */
 .navbar {
   width: 100%;
   background: #181818;
   border-bottom: 1px solid #333;
 }
 
-/* Contenedor interno de la navbar */
 .navbar-contenedor {
   max-width: 1200px;
   margin: 0 auto;
@@ -44,7 +42,6 @@ button {
   align-items: center;
 }
 
-/* Logo o título del panel */
 .navbar-logo a,
 .navbar-logo span {
   font-size: 24px;
@@ -52,14 +49,12 @@ button {
   color: #ffffff;
 }
 
-/* Enlaces de navegación */
 .navbar-links {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* Estilo de enlaces y botones del menú */
 .navbar-links a,
 .navbar-links button {
   color: #ffffff;
@@ -68,7 +63,6 @@ button {
   font-size: 16px;
 }
 
-/* Efecto hover */
 .navbar-links a:hover,
 .navbar-links button:hover {
   color: #00d084;
@@ -78,7 +72,6 @@ button {
 /* CONTENIDO GENERAL */
 /* ========================= */
 
-/* Contenedor principal de cada página */
 .contenido {
   max-width: 1200px;
   margin: 0 auto;
@@ -90,65 +83,92 @@ button {
 /* ========================= */
 
 .home {
-  text-align: center;
+  width: 100%;
 }
 
-/* Sección principal de presentación */
-.hero {
-  padding: 80px 20px;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  border-radius: 12px;
+.home-hero {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  padding: 48px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(0, 208, 132, 0.18), rgba(15, 23, 42, 0.95)),
+    #111827;
 }
 
-/* Título principal */
-.hero h1 {
-  font-size: 48px;
+.home-hero-texto {
+  max-width: 560px;
+}
+
+.home-hero h1 {
+  font-size: 56px;
   margin-bottom: 16px;
 }
 
-/* Texto descriptivo */
-.hero p {
-  font-size: 18px;
-  margin-bottom: 24px;
+.home-hero p {
+  font-size: 20px;
   color: #d1d5db;
+  margin-bottom: 28px;
 }
 
-/* Botón principal */
 .btn-principal {
+  display: inline-block;
   padding: 12px 24px;
   background: #00d084;
   border: none;
   font-size: 16px;
   color: #000;
   border-radius: 6px;
+  font-weight: bold;
 }
 
-/* Hover del botón principal */
 .btn-principal:hover {
   background: #00a76f;
 }
 
-/* Bloques informativos de la home */
-.features {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  padding: 40px 0;
+.home-seccion {
+  margin-top: 48px;
 }
 
-/* Tarjeta de característica */
-.feature {
+.home-seccion h2 {
+  margin-bottom: 20px;
+}
+
+.home-categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.home-card {
   background: #1e1e1e;
-  padding: 20px;
-  border-radius: 8px;
-  width: 220px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.home-card p {
+  color: #cfcfcf;
+}
+
+.home-plataformas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.home-plataformas span {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  padding: 12px 20px;
+  border-radius: 999px;
 }
 
 /* ========================= */
 /* TIENDA */
 /* ========================= */
 
-/* Grid de productos */
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -156,7 +176,6 @@ button {
   margin-top: 20px;
 }
 
-/* Tarjeta individual de producto */
 .producto-card {
   background: #1e1e1e;
   padding: 16px;
@@ -164,32 +183,28 @@ button {
   transition: transform 0.2s;
 }
 
-/* Hover de tarjeta */
 .producto-card:hover {
   transform: scale(1.03);
 }
 
-/* Descripción del producto */
 .descripcion {
   font-size: 14px;
   color: #ccc;
 }
 
-/* Precio del producto */
 .precio {
   font-size: 18px;
   font-weight: bold;
   margin: 10px 0;
 }
 
-/* Categorías del producto */
 .categorias {
   font-size: 12px;
   color: #888;
 }
 
-/* Botón añadir al carrito */
 .btn-carrito {
+  display: inline-block;
   width: 100%;
   padding: 10px;
   background: #00d084;
@@ -197,9 +212,10 @@ button {
   border-radius: 5px;
   margin-top: 10px;
   color: #000;
+  text-align: center;
+  font-weight: bold;
 }
 
-/* Hover botón carrito */
 .btn-carrito:hover {
   background: #00a76f;
 }
@@ -208,7 +224,6 @@ button {
 /* FORMULARIOS */
 /* ========================= */
 
-/* Formularios generales */
 form {
   max-width: 420px;
   display: flex;
@@ -216,7 +231,6 @@ form {
   gap: 14px;
 }
 
-/* Inputs y selects */
 input,
 select {
   padding: 12px;
@@ -226,7 +240,6 @@ select {
   color: #fff;
 }
 
-/* Botón dentro de formularios */
 form button {
   padding: 12px;
   background: #00d084;
@@ -236,7 +249,6 @@ form button {
   font-weight: bold;
 }
 
-/* Hover botón formulario */
 form button:hover {
   background: #00a76f;
 }
@@ -245,7 +257,6 @@ form button:hover {
 /* PANELES ADMIN / VENDEDOR */
 /* ========================= */
 
-/* Tarjeta de gestión */
 .panel-card {
   background: #1e1e1e;
   border: 1px solid #333;
@@ -254,7 +265,6 @@ form button:hover {
   margin-bottom: 14px;
 }
 
-/* Botones dentro de paneles */
 .panel-card button {
   margin-right: 8px;
   margin-top: 8px;
@@ -265,7 +275,6 @@ form button:hover {
   color: #000;
 }
 
-/* Hover botones panel */
 .panel-card button:hover {
   background: #00a76f;
 }
@@ -274,12 +283,95 @@ form button:hover {
 /* CARRITO / PEDIDOS */
 /* ========================= */
 
-/* Elementos de carrito o pedidos */
 .item-card {
   background: #1e1e1e;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 14px;
+}
+
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
+.footer {
+  margin-top: 40px;
+  background: #181818;
+  border-top: 1px solid #333;
+  padding: 32px;
+}
+
+.footer-contenido {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links a:hover {
+  color: #00d084;
+}
+
+.footer-copy {
+  text-align: center;
+  margin-top: 24px;
+  color: #aaa;
+}
+
+/* ========================= */
+/* FILTROS TIENDA */
+/* ========================= */
+
+.tienda-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.filtros {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filtros h3 {
+  margin-top: 0;
+}
+
+.filtros label {
+  font-size: 14px;
+  color: #cfcfcf;
+}
+
+.filtros button {
+  margin-top: 8px;
+  padding: 10px;
+  background: #00d084;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: bold;
+}
+
+.filtros button:hover {
+  background: #00a76f;
+}
+
+@media (max-width: 768px) {
+  .tienda-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ========================= */
@@ -297,12 +389,15 @@ form button:hover {
     justify-content: center;
   }
 
-  .features {
-    flex-direction: column;
-    align-items: center;
+  .home-hero {
+    padding: 32px 24px;
   }
 
-  .hero h1 {
+  .home-hero h1 {
     font-size: 36px;
+  }
+
+  .footer-contenido {
+    flex-direction: column;
   }
 }

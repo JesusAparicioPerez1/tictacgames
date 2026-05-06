@@ -2,13 +2,20 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
-// Página de catálogo de productos
+// Página de catálogo de productos con filtros
 function Tienda() {
-  // Lista de productos
+  // Lista completa de productos
   const [productos, setProductos] = useState([]);
 
   // Mensaje de error
   const [mensaje, setMensaje] = useState('');
+
+  // Filtros del catálogo
+  const [filtros, setFiltros] = useState({
+    plataforma: '',
+    tipo_producto: '',
+    precioMaximo: '',
+  });
 
   // Obtener productos al cargar la página
   useEffect(() => {
@@ -25,47 +32,122 @@ function Tienda() {
     obtenerProductos();
   }, []);
 
+  // Actualiza los filtros cuando el usuario cambia un campo
+  const manejarFiltro = (e) => {
+    setFiltros({
+      ...filtros,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Limpia todos los filtros
+  const limpiarFiltros = () => {
+    setFiltros({
+      plataforma: '',
+      tipo_producto: '',
+      precioMaximo: '',
+    });
+  };
+
+  // Aplica los filtros sobre la lista de productos
+  const productosFiltrados = productos.filter((producto) => {
+    const coincidePlataforma =
+      !filtros.plataforma || producto.plataforma === filtros.plataforma;
+
+    const coincideTipo =
+      !filtros.tipo_producto || producto.tipo_producto === filtros.tipo_producto;
+
+    const coincidePrecio =
+      !filtros.precioMaximo ||
+      Number(producto.precio) <= Number(filtros.precioMaximo);
+
+    return coincidePlataforma && coincideTipo && coincidePrecio;
+  });
+
   return (
     <main>
       <h2>Tienda</h2>
 
-      {/* Mensaje de error */}
       {mensaje && <p>{mensaje}</p>}
 
-      {/* Grid de productos */}
-      <div className="productos-grid">
-        {productos.map((producto) => (
-          <div key={producto.cod_producto} className="producto-card">
+      <section className="tienda-layout">
+        {/* Zona de filtros */}
+        <aside className="filtros">
+          <h3>Filtros</h3>
 
-            {/* Nombre del producto */}
-            <h3>{producto.nombre_producto}</h3>
+          <label>Plataforma</label>
+          <select
+            name="plataforma"
+            value={filtros.plataforma}
+            onChange={manejarFiltro}
+          >
+            <option value="">Todas</option>
+            <option value="Nintendo">Nintendo</option>
+            <option value="PlayStation">PlayStation</option>
+            <option value="Xbox">Xbox</option>
+            <option value="PC">PC</option>
+          </select>
 
-            {/* Descripción breve */}
-            <p className="descripcion">
-              {producto.descripcion_producto}
-            </p>
+          <label>Tipo</label>
+          <select
+            name="tipo_producto"
+            value={filtros.tipo_producto}
+            onChange={manejarFiltro}
+          >
+            <option value="">Todos</option>
+            <option value="videojuego">Videojuego</option>
+            <option value="dlc">DLC</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
 
-            {/* Precio */}
-            <p className="precio">
-              {producto.precio} €
-            </p>
+          <label>Precio máximo</label>
+          <input
+            type="number"
+            name="precioMaximo"
+            value={filtros.precioMaximo}
+            onChange={manejarFiltro}
+            placeholder="Ej: 50"
+            min="0"
+            step="0.01"
+          />
 
-            {/* Plataforma */}
-            <p className="categorias">
-              {producto.plataforma}
-            </p>
+          <button onClick={limpiarFiltros}>
+            Limpiar filtros
+          </button>
+        </aside>
 
-            {/* Enlace al detalle del producto */}
-            <Link
-              to={`/producto/${producto.cod_producto}`}
-              className="btn-carrito"
-            >
-              Ver detalle
-            </Link>
+        {/* Grid de productos */}
+        <div className="productos-grid">
+          {productosFiltrados.map((producto) => (
+            <div key={producto.cod_producto} className="producto-card">
+              <h3>{producto.nombre_producto}</h3>
 
-          </div>
-        ))}
-      </div>
+              <p className="descripcion">
+                {producto.descripcion_producto}
+              </p>
+
+              <p className="precio">
+                {producto.precio} €
+              </p>
+
+              <p className="categorias">
+                {producto.plataforma} · {producto.tipo_producto}
+              </p>
+
+              <Link
+                to={`/producto/${producto.cod_producto}`}
+                className="btn-carrito"
+              >
+                Ver detalle
+              </Link>
+            </div>
+          ))}
+
+          {productosFiltrados.length === 0 && (
+            <p>No hay productos que coincidan con los filtros.</p>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

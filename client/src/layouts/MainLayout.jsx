@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { obtenerUsuarioDesdeToken } from '../utils/auth';
+import Footer from '../components/Footer';
 
 // Layout principal que controla la navegación según el rol del usuario
 function MainLayout() {
@@ -95,7 +96,10 @@ function MainLayout() {
         <main className="contenido">
             <Outlet />
         </main>
+        {/* Footer solo para anónimo y usuario registrado */}
+        {(!usuario || usuario.cod_rol === 3) && <Footer />}
         </>
+        
     );
 }
 
