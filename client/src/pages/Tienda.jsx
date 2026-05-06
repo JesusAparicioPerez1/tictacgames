@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
-// Página de catálogo de productos con filtros
+// Página de catálogo de productos con filtros y búsqueda
 function Tienda() {
   // Lista completa de productos
   const [productos, setProductos] = useState([]);
@@ -10,8 +10,9 @@ function Tienda() {
   // Mensaje de error
   const [mensaje, setMensaje] = useState('');
 
-  // Filtros del catálogo
+  // Estado de filtros y búsqueda
   const [filtros, setFiltros] = useState({
+    busqueda: '',
     plataforma: '',
     tipo_producto: '',
     precioMaximo: '',
@@ -32,7 +33,7 @@ function Tienda() {
     obtenerProductos();
   }, []);
 
-  // Actualiza los filtros cuando el usuario cambia un campo
+  // Actualiza filtros y búsqueda
   const manejarFiltro = (e) => {
     setFiltros({
       ...filtros,
@@ -43,39 +44,70 @@ function Tienda() {
   // Limpia todos los filtros
   const limpiarFiltros = () => {
     setFiltros({
+      busqueda: '',
       plataforma: '',
       tipo_producto: '',
       precioMaximo: '',
     });
   };
 
-  // Aplica los filtros sobre la lista de productos
+  // Filtra productos
   const productosFiltrados = productos.filter((producto) => {
+    // Buscar por nombre
+    const coincideBusqueda =
+      producto.nombre_producto
+        .toLowerCase()
+        .includes(filtros.busqueda.toLowerCase());
+
+    // Filtrar por plataforma
     const coincidePlataforma =
-      !filtros.plataforma || producto.plataforma === filtros.plataforma;
+      !filtros.plataforma ||
+      producto.plataforma === filtros.plataforma;
 
+    // Filtrar por tipo
     const coincideTipo =
-      !filtros.tipo_producto || producto.tipo_producto === filtros.tipo_producto;
+      !filtros.tipo_producto ||
+      producto.tipo_producto === filtros.tipo_producto;
 
+    // Filtrar por precio
     const coincidePrecio =
       !filtros.precioMaximo ||
       Number(producto.precio) <= Number(filtros.precioMaximo);
 
-    return coincidePlataforma && coincideTipo && coincidePrecio;
+    return (
+      coincideBusqueda &&
+      coincidePlataforma &&
+      coincideTipo &&
+      coincidePrecio
+    );
   });
 
   return (
     <main>
       <h2>Tienda</h2>
 
+      {/* Mensaje de error */}
       {mensaje && <p>{mensaje}</p>}
 
       <section className="tienda-layout">
-        {/* Zona de filtros */}
+        {/* Sidebar de filtros */}
         <aside className="filtros">
           <h3>Filtros</h3>
 
+          {/* Buscador */}
+          <label>Buscar producto</label>
+
+          <input
+            type="text"
+            name="busqueda"
+            value={filtros.busqueda}
+            onChange={manejarFiltro}
+            placeholder="Buscar..."
+          />
+
+          {/* Plataforma */}
           <label>Plataforma</label>
+
           <select
             name="plataforma"
             value={filtros.plataforma}
@@ -88,7 +120,9 @@ function Tienda() {
             <option value="PC">PC</option>
           </select>
 
+          {/* Tipo de producto */}
           <label>Tipo</label>
+
           <select
             name="tipo_producto"
             value={filtros.tipo_producto}
@@ -100,7 +134,9 @@ function Tienda() {
             <option value="tarjeta">Tarjeta</option>
           </select>
 
+          {/* Precio máximo */}
           <label>Precio máximo</label>
+
           <input
             type="number"
             name="precioMaximo"
@@ -111,6 +147,7 @@ function Tienda() {
             step="0.01"
           />
 
+          {/* Limpiar filtros */}
           <button onClick={limpiarFiltros}>
             Limpiar filtros
           </button>
@@ -119,21 +156,34 @@ function Tienda() {
         {/* Grid de productos */}
         <div className="productos-grid">
           {productosFiltrados.map((producto) => (
-            <div key={producto.cod_producto} className="producto-card">
+            <div
+              key={producto.cod_producto}
+              className="producto-card"
+            >
+              {/* Placeholder visual */}
+              <div className="producto-imagen">
+                {producto.plataforma}
+              </div>
+
+              {/* Nombre */}
               <h3>{producto.nombre_producto}</h3>
 
+              {/* Descripción */}
               <p className="descripcion">
                 {producto.descripcion_producto}
               </p>
 
+              {/* Precio */}
               <p className="precio">
                 {producto.precio} €
               </p>
 
+              {/* Categorías */}
               <p className="categorias">
                 {producto.plataforma} · {producto.tipo_producto}
               </p>
 
+              {/* Botón detalle */}
               <Link
                 to={`/producto/${producto.cod_producto}`}
                 className="btn-carrito"
@@ -143,6 +193,7 @@ function Tienda() {
             </div>
           ))}
 
+          {/* Sin resultados */}
           {productosFiltrados.length === 0 && (
             <p>No hay productos que coincidan con los filtros.</p>
           )}
