@@ -1,0 +1,43 @@
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
+.footer {
+  margin-top: 40px;
+  background: #181818;
+  border-top: 1px solid #333;
+  padding: 32px;
+}
+
+.footer-contenido {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links a:hover {
+  color: #00d084;
+}
+
+.footer-copy {
+  text-align: center;
+  margin-top: 24px;
+  color: #aaa;
+}
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+
+@media (max-width: 768px) {
+  .footer-contenido {
+    flex-direction: column;
+  }
+}

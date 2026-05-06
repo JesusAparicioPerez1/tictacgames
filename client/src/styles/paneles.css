@@ -1,0 +1,32 @@
+/* ========================= */
+/* PANELES */
+/* ========================= */
+
+.panel-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.panel-card button {
+  margin-right: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #00d084;
+  border: none;
+  border-radius: 5px;
+  color: #000;
+}
+
+.panel-card button:hover {
+  background: #00a76f;
+}
+
+.item-card {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 14px;
+}

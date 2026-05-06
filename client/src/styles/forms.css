@@ -1,0 +1,32 @@
+/* ========================= */
+/* FORMULARIOS */
+/* ========================= */
+
+form {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+input,
+select {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #1e1e1e;
+  color: #fff;
+}
+
+form button {
+  padding: 12px;
+  background: #00d084;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: bold;
+}
+
+form button:hover {
+  background: #00a76f;
+}
