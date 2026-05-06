@@ -39,4 +39,11 @@ router.get(
   productoControlador.listarMisProductos
 );
 
+
+// Público: obtener detalle de un producto concreto
+router.get(
+  '/:cod_producto',
+  productoControlador.obtenerDetalleProducto
+);
+
 module.exports = router;

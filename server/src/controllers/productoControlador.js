@@ -149,10 +149,33 @@ const listarMisProductos = async (req, res) => {
   }
 };
 
+// Devuelve el detalle de un producto concreto
+const obtenerDetalleProducto = async (req, res) => {
+try {
+    const { cod_producto } = req.params;
+
+    const producto = await productoModelo.obtenerProductoPorCodigo(cod_producto);
+
+    if (!producto) {
+      return res.status(404).json({
+        mensaje: 'Producto no encontrado',
+      });
+    }
+
+    res.json(producto);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al obtener detalle del producto',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   crearProducto,
   listarProductos,
   editarProducto,
   eliminarProducto,
   listarMisProductos,
+  obtenerDetalleProducto,
 };
