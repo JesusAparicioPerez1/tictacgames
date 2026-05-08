@@ -20,33 +20,14 @@
   justify-content: center;
 }
 
-.placeholder-imagen {
+.detalle-img {
   width: 100%;
   min-height: 500px;
+  max-height: 520px;
+
+  object-fit: cover;
 
   border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #0f172a,
-      #1e293b
-    );
-
-  overflow: hidden;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-contenido {
-  text-align: center;
-}
-
-.placeholder-contenido span {
-  font-size: 42px;
-  font-weight: bold;
 }
 
 /* ========================= */
@@ -78,9 +59,7 @@
 .detalle-divider {
   width: 100%;
   height: 1px;
-
   background: #333;
-
   margin: 24px 0;
 }
 
@@ -89,14 +68,9 @@
   line-height: 1.8;
 }
 
-/* ========================= */
-/* COMPRA */
-/* ========================= */
-
 .detalle-compra {
   display: flex;
   gap: 48px;
-
   margin: 32px 0;
 }
 
@@ -117,7 +91,6 @@
 
 .btn-comprar {
   width: fit-content;
-
   padding: 16px 28px;
 
   border: none;
@@ -179,7 +152,7 @@
     gap: 24px;
   }
 
-  .placeholder-imagen {
+  .detalle-img {
     min-height: 320px;
   }
 }
