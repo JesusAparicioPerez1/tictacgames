@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import obtenerImagenProducto from '../utils/obtenerImagenProducto';
 
@@ -7,11 +7,13 @@ import obtenerImagenProducto from '../utils/obtenerImagenProducto';
 function Tienda() {
   const [productos, setProductos] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  // Permite leer parámetros de la URL
+  const [searchParams] = useSearchParams();
 
   const [filtros, setFiltros] = useState({
     busqueda: '',
-    plataforma: '',
-    tipo_producto: '',
+    plataforma: searchParams.get('plataforma') || '',
+    tipo_producto: searchParams.get('tipo') || '',
     precioMaximo: '',
   });
 
