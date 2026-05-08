@@ -1,5 +1,28 @@
 const conexionBD = require('../config/conexionBD');
 
+// Obtiene todos los productos
+const obtenerProductos = async () => {
+  const [filas] = await conexionBD.query(
+    `SELECT *
+     FROM producto
+     ORDER BY cod_producto DESC`
+  );
+
+  return filas;
+};
+
+// Obtiene un producto por ID
+const obtenerProductoPorId = async (cod_producto) => {
+  const [filas] = await conexionBD.query(
+    `SELECT *
+     FROM producto
+     WHERE cod_producto = ?`,
+    [cod_producto]
+  );
+
+  return filas[0];
+};
+
 // Crear producto
 const crearProducto = async ({
   nombre_producto,
@@ -11,8 +34,16 @@ const crearProducto = async ({
   cod_usuario,
 }) => {
   const [resultado] = await conexionBD.query(
-    `INSERT INTO producto 
-    (nombre_producto, descripcion_producto, precio, stock, tipo_producto, plataforma, cod_usuario)
+    `INSERT INTO producto
+    (
+      nombre_producto,
+      descripcion_producto,
+      precio,
+      stock,
+      tipo_producto,
+      plataforma,
+      cod_usuario
+    )
     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       nombre_producto,
@@ -28,58 +59,28 @@ const crearProducto = async ({
   return resultado.insertId;
 };
 
-// Obtener productos
-const obtenerProductos = async () => {
-  const [filas] = await conexionBD.query(`
-    SELECT 
-      p.cod_producto,
-      p.nombre_producto,
-      p.descripcion_producto,
-      p.precio,
-      p.stock,
-      p.plataforma,
-      p.tipo_producto,
-      GROUP_CONCAT(c.nombre_categoria) AS categorias
-    FROM producto p
-    LEFT JOIN producto_categoria pc ON p.cod_producto = pc.cod_producto
-    LEFT JOIN categoria c ON pc.cod_categoria = c.cod_categoria
-    WHERE p.activo = TRUE
-    GROUP BY p.cod_producto
-  `);
-
-  return filas;
-};
-
-// Obtener producto por ID
-const obtenerProductoPorCodigo = async (cod_producto) => {
-  const [filas] = await conexionBD.query(
-    'SELECT * FROM producto WHERE cod_producto = ?',
-    [cod_producto]
-  );
-
-  return filas[0];
-};
-
-// Actualizar producto
-const actualizarProducto = async (cod_producto, producto) => {
-  const {
+// Editar producto
+const editarProducto = async (
+  cod_producto,
+  {
     nombre_producto,
     descripcion_producto,
     precio,
     stock,
     tipo_producto,
     plataforma,
-  } = producto;
-
+  }
+) => {
   const [resultado] = await conexionBD.query(
-    `UPDATE producto SET
+    `UPDATE producto
+     SET
       nombre_producto = ?,
       descripcion_producto = ?,
       precio = ?,
       stock = ?,
       tipo_producto = ?,
       plataforma = ?
-    WHERE cod_producto = ?`,
+     WHERE cod_producto = ?`,
     [
       nombre_producto,
       descripcion_producto,
@@ -94,41 +95,65 @@ const actualizarProducto = async (cod_producto, producto) => {
   return resultado.affectedRows;
 };
 
-// Eliminar (borrado lógico)
+// Eliminar producto
 const eliminarProducto = async (cod_producto) => {
   const [resultado] = await conexionBD.query(
-    'UPDATE producto SET activo = FALSE WHERE cod_producto = ?',
+    `DELETE FROM producto
+     WHERE cod_producto = ?`,
     [cod_producto]
   );
 
   return resultado.affectedRows;
 };
 
-// Obtiene los productos creados por un vendedor concreto
-const obtenerProductosPorUsuario = async (cod_usuario) => {
+// Obtiene producto destacado
+const obtenerProductoDestacado = async () => {
   const [filas] = await conexionBD.query(
-    `SELECT 
-      cod_producto,
-      nombre_producto,
-      descripcion_producto,
-      precio,
-      stock,
-      plataforma,
-      tipo_producto
+    `SELECT *
      FROM producto
-     WHERE cod_usuario = ? AND activo = TRUE`,
-    [cod_usuario]
+     WHERE destacado = TRUE
+     LIMIT 1`
   );
 
-  return filas;
+  return filas[0];
 };
 
+// Actualiza producto destacado
+const actualizarProductoDestacado = async (
+  cod_producto,
+  destacado,
+  texto_promocion
+) => {
+
+  // Quitamos destacado a todos
+  await conexionBD.query(
+    `UPDATE producto
+     SET destacado = FALSE`
+  );
+
+  // Marcamos el seleccionado
+  const [resultado] = await conexionBD.query(
+    `UPDATE producto
+     SET
+      destacado = ?,
+      texto_promocion = ?
+     WHERE cod_producto = ?`,
+    [
+      destacado,
+      texto_promocion,
+      cod_producto,
+    ]
+  );
+
+  return resultado.affectedRows;
+};
 
 module.exports = {
-  crearProducto,
   obtenerProductos,
-  obtenerProductoPorCodigo,
-  actualizarProducto,
+  obtenerProductoPorId,
+  crearProducto,
+  editarProducto,
   eliminarProducto,
-  obtenerProductosPorUsuario,
+  obtenerProductoDestacado,
+  actualizarProductoDestacado,
 };

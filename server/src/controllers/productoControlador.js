@@ -171,6 +171,60 @@ try {
   }
 };
 
+// Devuelve el producto destacado de la tienda
+const obtenerProductoDestacado = async (req, res) => {
+  try {
+    const producto =
+      await productoModelo.obtenerProductoDestacado();
+
+    res.json(producto || null);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      mensaje: 'Error al obtener producto destacado',
+      error: error.message,
+    });
+  }
+};
+
+// Actualiza el producto destacado desde admin
+const actualizarProductoDestacado = async (
+  req,
+  res
+) => {
+  try {
+
+    const { cod_producto } = req.params;
+
+    const {
+      destacado,
+      texto_promocion,
+    } = req.body;
+
+    await productoModelo.actualizarProductoDestacado(
+      cod_producto,
+      destacado,
+      texto_promocion
+    );
+
+    res.json({
+      mensaje:
+        'Producto destacado actualizado correctamente',
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      mensaje:
+        'Error al actualizar producto destacado',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   crearProducto,
   listarProductos,
@@ -178,4 +232,6 @@ module.exports = {
   eliminarProducto,
   listarMisProductos,
   obtenerDetalleProducto,
+  obtenerProductoDestacado,
+  actualizarProductoDestacado,
 };

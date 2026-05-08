@@ -16,6 +16,14 @@ router.post(
   productoControlador.crearProducto
 );
 
+// Actualizar producto destacado
+router.put(
+  '/:cod_producto/destacado',
+  verificarToken,
+  verificarRol(1),
+  productoControlador.actualizarProductoDestacado
+);
+
 // Privado: editar producto (admin o vendedor)
 router.put(
   '/:cod_producto',
@@ -39,6 +47,11 @@ router.get(
   productoControlador.listarMisProductos
 );
 
+// Producto destacado para Home
+router.get(
+  '/destacado',
+  productoControlador.obtenerProductoDestacado
+);
 
 // Público: obtener detalle de un producto concreto
 router.get(
