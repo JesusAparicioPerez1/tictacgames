@@ -5,61 +5,120 @@
 .detalle-producto {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 48px;
 
   margin-top: 24px;
 }
 
-/* Zona visual */
+/* ========================= */
+/* IMAGEN */
+/* ========================= */
+
 .detalle-imagen {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Placeholder visual */
 .placeholder-imagen {
   width: 100%;
-  min-height: 420px;
+  min-height: 500px;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
   background:
-    linear-gradient(135deg, #0f172a, #1e293b);
+    linear-gradient(
+      135deg,
+      #0f172a,
+      #1e293b
+    );
+
+  overflow: hidden;
 
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  font-size: 32px;
+.placeholder-contenido {
+  text-align: center;
+}
+
+.placeholder-contenido span {
+  font-size: 42px;
   font-weight: bold;
 }
 
-/* Información */
+/* ========================= */
+/* INFORMACIÓN */
+/* ========================= */
+
+.detalle-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .detalle-info h1 {
-  margin-top: 0;
-  font-size: 42px;
+  margin: 0;
+  font-size: 48px;
+}
+
+.detalle-tipo {
+  color: #00d084;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
 }
 
 .detalle-plataforma {
-  color: #00d084;
-  margin-bottom: 20px;
+  color: #d1d5db;
+  margin-top: 16px;
+}
+
+.detalle-divider {
+  width: 100%;
+  height: 1px;
+
+  background: #333;
+
+  margin: 24px 0;
 }
 
 .detalle-descripcion {
   color: #d1d5db;
-  line-height: 1.6;
+  line-height: 1.8;
+}
+
+/* ========================= */
+/* COMPRA */
+/* ========================= */
+
+.detalle-compra {
+  display: flex;
+  gap: 48px;
+
+  margin: 32px 0;
+}
+
+.detalle-label {
+  color: #999;
+  margin-bottom: 8px;
 }
 
 .detalle-precio {
-  font-size: 36px;
+  font-size: 40px;
   font-weight: bold;
-  margin: 24px 0;
 }
 
-/* Botón comprar */
+.detalle-stock {
+  font-size: 28px;
+  font-weight: bold;
+}
+
 .btn-comprar {
-  padding: 14px 24px;
+  width: fit-content;
+
+  padding: 16px 28px;
 
   border: none;
   border-radius: 8px;
@@ -75,9 +134,12 @@
   background: #00a76f;
 }
 
-/* Botón volver */
+/* ========================= */
+/* BOTÓN VOLVER */
+/* ========================= */
+
 .btn-volver {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 
   background: none;
   border: none;
@@ -90,9 +152,12 @@
   color: #00d084;
 }
 
-/* Mensajes */
+/* ========================= */
+/* MENSAJES */
+/* ========================= */
+
 .mensaje-producto {
-  margin-top: 16px;
+  margin-top: 20px;
   color: #00d084;
 }
 
@@ -100,12 +165,21 @@
 /* RESPONSIVE */
 /* ========================= */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .detalle-producto {
     grid-template-columns: 1fr;
   }
 
   .detalle-info h1 {
-    font-size: 32px;
+    font-size: 36px;
+  }
+
+  .detalle-compra {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .placeholder-imagen {
+    min-height: 320px;
   }
 }

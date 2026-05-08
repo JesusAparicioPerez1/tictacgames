@@ -3,23 +3,55 @@ import api from '../services/api';
 
 // Panel de administración con pestañas internas:
 // Usuarios | Productos | Plataformas
-    function Admin() {
-    // ===== ESTADO =====
+function Admin() {
+    // ===== ESTADO GENERAL =====
+
     // Lista de usuarios
     const [usuarios, setUsuarios] = useState([]);
 
-    // Lista de productos (para la pestaña Productos)
+    // Lista de productos
     const [productos, setProductos] = useState([]);
 
-    // Mensajes de estado (éxito/error)
+    // Mensajes de estado
     const [mensaje, setMensaje] = useState('');
 
-    // Control de la pestaña activa del admin
-    // 'usuarios' | 'productos' | 'plataformas'
+    // Pestaña activa del panel admin
     const [seccionActiva, setSeccionActiva] = useState('usuarios');
 
-    // ===== FUNCIONES USUARIOS =====
-    // Obtener todos los usuarios
+    // ===== MODAL CREAR USUARIO =====
+
+    // Controla si el modal de creación de usuario está abierto
+    const [modalUsuarioAbierto, setModalUsuarioAbierto] = useState(false);
+
+    // Formulario para crear usuario desde admin
+    const [formUsuario, setFormUsuario] = useState({
+        nombre: '',
+        correo: '',
+        contrasena: '',
+        cod_rol: 3,
+    });
+
+    // ===== MODAL EDITAR PRODUCTO =====
+
+    // Controla si el modal de edición de producto está abierto
+    const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
+
+    // Producto que se está editando
+    const [productoEditando, setProductoEditando] = useState(null);
+
+    // Formulario para editar producto
+    const [formProducto, setFormProducto] = useState({
+        nombre_producto: '',
+        descripcion_producto: '',
+        precio: '',
+        stock: '',
+        tipo_producto: '',
+        plataforma: '',
+    });
+
+    // ===== FUNCIONES DE USUARIOS =====
+
+    // Obtiene todos los usuarios
     const obtenerUsuarios = async () => {
         try {
         const token = localStorage.getItem('token');
@@ -29,6 +61,7 @@ import api from '../services/api';
             Authorization: `Bearer ${token}`,
             },
         });
+        console.log('Usuarios recibidos:', res.data);
 
         setUsuarios(res.data);
         } catch (error) {
@@ -37,7 +70,7 @@ import api from '../services/api';
         }
     };
 
-    // Cambiar rol de usuario
+    // Cambia el rol de un usuario
     const cambiarRol = async (cod_usuario, cod_rol) => {
         try {
         const token = localStorage.getItem('token');
@@ -53,8 +86,6 @@ import api from '../services/api';
         );
 
         setMensaje('Rol actualizado correctamente');
-
-        // Recargar usuarios
         obtenerUsuarios();
         } catch (error) {
         console.error(error);
@@ -62,7 +93,7 @@ import api from '../services/api';
         }
     };
 
-    // Activar o desactivar usuario
+    // Activa o desactiva un usuario
     const cambiarEstadoUsuario = async (cod_usuario, activo) => {
         try {
         const token = localStorage.getItem('token');
@@ -83,7 +114,6 @@ import api from '../services/api';
             : 'Usuario desactivado correctamente'
         );
 
-        // Recargar usuarios
         obtenerUsuarios();
         } catch (error) {
         console.error(error);
@@ -91,8 +121,89 @@ import api from '../services/api';
         }
     };
 
-    // ===== FUNCIONES PRODUCTOS =====
-    // Obtener productos (para admin)
+    // Abre el modal para crear usuario
+    const abrirModalUsuario = () => {
+        setFormUsuario({
+        nombre: '',
+        correo: '',
+        contrasena: '',
+        cod_rol: 3,
+        });
+
+        setModalUsuarioAbierto(true);
+    };
+
+    // Cierra el modal de usuario
+    const cerrarModalUsuario = () => {
+        setModalUsuarioAbierto(false);
+
+        setFormUsuario({
+        nombre: '',
+        correo: '',
+        contrasena: '',
+        cod_rol: 3,
+        });
+    };
+
+    // Actualiza campos del formulario de usuario
+    const manejarCambioUsuario = (e) => {
+        setFormUsuario({
+        ...formUsuario,
+        [e.target.name]: e.target.value,
+        });
+    };
+
+    // Crea un usuario desde el panel admin
+    const crearUsuario = async (e) => {
+        e.preventDefault();
+
+        try {
+        const token = localStorage.getItem('token');
+
+        await api.post('/usuarios', formUsuario, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+
+        setMensaje('Usuario creado correctamente');
+        cerrarModalUsuario();
+        obtenerUsuarios();
+        } catch (error) {
+        console.error(error);
+
+        setMensaje(
+            error.response?.data?.mensaje || 'Error al crear usuario'
+        );
+        }
+    };
+
+    // Elimina un usuario definitivamente
+    const eliminarUsuario = async (cod_usuario) => {
+        try {
+        const token = localStorage.getItem('token');
+
+        await api.delete(`/usuarios/${cod_usuario}`, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+
+        setMensaje('Usuario eliminado correctamente');
+        obtenerUsuarios();
+        } catch (error) {
+        console.error(error);
+
+        setMensaje(
+            error.response?.data?.mensaje ||
+            'No se puede eliminar el usuario porque tiene datos asociados'
+        );
+        }
+    };
+
+    // ===== FUNCIONES DE PRODUCTOS =====
+
+    // Obtiene todos los productos
     const obtenerProductos = async () => {
         try {
         const res = await api.get('/productos');
@@ -103,7 +214,81 @@ import api from '../services/api';
         }
     };
 
-    // Eliminar producto (admin puede eliminar cualquiera)
+    // Abre el modal de edición de producto
+    const abrirModalEditarProducto = (producto) => {
+        setProductoEditando(producto.cod_producto);
+
+        setFormProducto({
+        nombre_producto: producto.nombre_producto || '',
+        descripcion_producto: producto.descripcion_producto || '',
+        precio: producto.precio || '',
+        stock: producto.stock || '',
+        tipo_producto: producto.tipo_producto || '',
+        plataforma: producto.plataforma || '',
+        });
+
+        setModalProductoAbierto(true);
+    };
+
+    // Cierra el modal de producto
+    const cerrarModalProducto = () => {
+        setModalProductoAbierto(false);
+        setProductoEditando(null);
+
+        setFormProducto({
+        nombre_producto: '',
+        descripcion_producto: '',
+        precio: '',
+        stock: '',
+        tipo_producto: '',
+        plataforma: '',
+        });
+    };
+
+    // Actualiza campos del formulario de producto
+    const manejarCambioProducto = (e) => {
+        setFormProducto({
+        ...formProducto,
+        [e.target.name]: e.target.value,
+        });
+    };
+
+    // Guarda los cambios de un producto
+    const guardarCambiosProducto = async (e) => {
+        e.preventDefault();
+
+        try {
+        const token = localStorage.getItem('token');
+
+        const productoActualizado = {
+            ...formProducto,
+            precio: Number(formProducto.precio),
+            stock: Number(formProducto.stock),
+        };
+
+        await api.put(
+            `/productos/${productoEditando}`,
+            productoActualizado,
+            {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            }
+        );
+
+        setMensaje('Producto actualizado correctamente');
+        cerrarModalProducto();
+        obtenerProductos();
+        } catch (error) {
+        console.error(error);
+
+        setMensaje(
+            error.response?.data?.mensaje || 'Error al actualizar producto'
+        );
+        }
+    };
+
+    // Elimina un producto
     const eliminarProducto = async (cod_producto) => {
         try {
         const token = localStorage.getItem('token');
@@ -114,9 +299,7 @@ import api from '../services/api';
             },
         });
 
-        setMensaje('Producto eliminado');
-
-        // Recargar productos
+        setMensaje('Producto eliminado correctamente');
         obtenerProductos();
         } catch (error) {
         console.error(error);
@@ -125,35 +308,36 @@ import api from '../services/api';
     };
 
     // ===== EFECTOS =====
-    // Cargar usuarios al entrar
+
+    // Carga usuarios al entrar en el panel
     useEffect(() => {
-        const cargar = async () => {
+        const cargarUsuarios = async () => {
         await obtenerUsuarios();
         };
-        cargar();
+
+        cargarUsuarios();
     }, []);
 
-    // Cargar productos cuando se cambia a la pestaña Productos
-        useEffect(() => {
+    // Carga productos cuando se entra en la pestaña productos
+    useEffect(() => {
         const cargarProductos = async () => {
-            if (seccionActiva === 'productos') {
-        await obtenerProductos();
+        if (seccionActiva === 'productos') {
+            await obtenerProductos();
         }
-    };
+        };
 
-    cargarProductos();
+        cargarProductos();
     }, [seccionActiva]);
 
-    // ===== RENDER =====
     return (
         <main>
         <h2>Panel de Administración</h2>
 
         {/* Mensaje de estado */}
-        {mensaje && <p>{mensaje}</p>}
+        {mensaje && <p className="mensaje-producto">{mensaje}</p>}
 
-        {/* ===== PESTAÑAS ===== */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* Pestañas del panel admin */}
+        <div className="admin-tabs">
             <button onClick={() => setSeccionActiva('usuarios')}>
             Usuarios
             </button>
@@ -167,20 +351,41 @@ import api from '../services/api';
             </button>
         </div>
 
-        {/* ===== SECCIÓN USUARIOS ===== */}
+        {/* ========================= */}
+        {/* SECCIÓN USUARIOS */}
+        {/* ========================= */}
         {seccionActiva === 'usuarios' && (
-            <div>
-            {usuarios.map((u) => (
-                <div
-                key={u.cod_usuario}
-                className="panel-card"
-                >
-                <p><strong>{u.nombre}</strong></p>
-                <p>{u.correo}</p>
-                <p>Rol: {u.cod_rol}</p>
-                <p>Activo: {u.activo ? 'Sí' : 'No'}</p>
+            <section>
+            <div className="panel-cabecera">
+                <div>
+                <h3>Usuarios</h3>
+                <p>Gestiona usuarios, roles y accesos.</p>
+                </div>
 
-                {/* Botones de rol */}
+                <button onClick={abrirModalUsuario}>
+                Crear usuario
+                </button>
+            </div>
+
+            {usuarios.length === 0 && (
+                <p>No hay usuarios para mostrar.</p>
+            )}
+
+            {usuarios.map((u) => (
+                <div key={u.cod_usuario} className="panel-card">
+                <p>
+                    <strong>{u.nombre}</strong>
+                </p>
+
+                <p>{u.correo}</p>
+
+                <p>Rol: {u.cod_rol}</p>
+
+                <p>
+                    Estado:{' '}
+                    {Number(u.activo) === 1 ? 'Activo' : 'Desactivado'}
+                </p>
+
                 <button onClick={() => cambiarRol(u.cod_usuario, 1)}>
                     Admin
                 </button>
@@ -193,8 +398,7 @@ import api from '../services/api';
                     Usuario
                 </button>
 
-                {/* Botón dinámico activar/desactivar */}
-                {u.activo ? (
+                {Number(u.activo) === 1 ? (
                     <button
                     onClick={() =>
                         cambiarEstadoUsuario(u.cod_usuario, false)
@@ -211,35 +415,209 @@ import api from '../services/api';
                     Activar
                     </button>
                 )}
+
+                <button onClick={() => eliminarUsuario(u.cod_usuario)}>
+                    Eliminar
+                </button>
                 </div>
             ))}
-            </div>
+            </section>
         )}
 
-        {/* ===== SECCIÓN PRODUCTOS ===== */}
+        {/* ========================= */}
+        {/* SECCIÓN PRODUCTOS */}
+        {/* ========================= */}
         {seccionActiva === 'productos' && (
-            <div>
+            <section>
+            {productos.length === 0 && (
+                <p>No hay productos para mostrar.</p>
+            )}
+
             {productos.map((p) => (
-                <div
-                key={p.cod_producto}
-                className="panel-card"
-                >
-                <p><strong>{p.nombre_producto}</strong></p>
-                <p>{p.precio} €</p>
-                <p>{p.plataforma}</p>
+                <div key={p.cod_producto} className="panel-card">
+                <h4>{p.nombre_producto}</h4>
+
+                <p>{p.descripcion_producto}</p>
+
+                <p>Precio: {p.precio} €</p>
+
+                <p>Stock: {p.stock}</p>
+
+                <p>Plataforma: {p.plataforma}</p>
+
+                <p>Tipo: {p.tipo_producto}</p>
+
+                <button onClick={() => abrirModalEditarProducto(p)}>
+                    Editar
+                </button>
 
                 <button onClick={() => eliminarProducto(p.cod_producto)}>
                     Eliminar
                 </button>
                 </div>
             ))}
+            </section>
+        )}
+
+        {/* ========================= */}
+        {/* SECCIÓN PLATAFORMAS */}
+        {/* ========================= */}
+        {seccionActiva === 'plataformas' && (
+            <section className="panel-card">
+            <h3>Gestión de plataformas</h3>
+
+            <p>
+                Esta sección queda preparada para gestionar plataformas como
+                Nintendo, PlayStation, Xbox y PC.
+            </p>
+            </section>
+        )}
+
+        {/* ========================= */}
+        {/* MODAL EDITAR PRODUCTO */}
+        {/* ========================= */}
+        {modalProductoAbierto && (
+            <div className="modal-fondo">
+            <div className="modal-contenido">
+                <div className="modal-cabecera">
+                <h3>Editar producto</h3>
+
+                <button onClick={cerrarModalProducto}>
+                    Cerrar
+                </button>
+                </div>
+
+                <form onSubmit={guardarCambiosProducto}>
+                <input
+                    type="text"
+                    name="nombre_producto"
+                    value={formProducto.nombre_producto}
+                    onChange={manejarCambioProducto}
+                    placeholder="Nombre"
+                    required
+                />
+
+                <input
+                    type="text"
+                    name="descripcion_producto"
+                    value={formProducto.descripcion_producto}
+                    onChange={manejarCambioProducto}
+                    placeholder="Descripción"
+                />
+
+                <input
+                    type="number"
+                    name="precio"
+                    value={formProducto.precio}
+                    onChange={manejarCambioProducto}
+                    step="0.01"
+                    min="0"
+                    placeholder="Precio (€)"
+                    required
+                />
+
+                <input
+                    type="number"
+                    name="stock"
+                    value={formProducto.stock}
+                    onChange={manejarCambioProducto}
+                    step="1"
+                    min="0"
+                    placeholder="Stock"
+                    required
+                />
+
+                <select
+                    name="tipo_producto"
+                    value={formProducto.tipo_producto}
+                    onChange={manejarCambioProducto}
+                    required
+                >
+                    <option value="">Tipo</option>
+                    <option value="videojuego">Videojuego</option>
+                    <option value="dlc">DLC</option>
+                    <option value="tarjeta">Tarjeta</option>
+                </select>
+
+                <select
+                    name="plataforma"
+                    value={formProducto.plataforma}
+                    onChange={manejarCambioProducto}
+                    required
+                >
+                    <option value="">Plataforma</option>
+                    <option value="Nintendo">Nintendo</option>
+                    <option value="PlayStation">PlayStation</option>
+                    <option value="Xbox">Xbox</option>
+                    <option value="PC">PC</option>
+                </select>
+
+                <button type="submit">
+                    Guardar cambios
+                </button>
+                </form>
+            </div>
             </div>
         )}
 
-        {/* ===== SECCIÓN PLATAFORMAS ===== */}
-        {seccionActiva === 'plataformas' && (
-            <div>
-            <p>Gestión de plataformas (pendiente)</p>
+        {/* ========================= */}
+        {/* MODAL CREAR USUARIO */}
+        {/* ========================= */}
+        {modalUsuarioAbierto && (
+            <div className="modal-fondo">
+            <div className="modal-contenido">
+                <div className="modal-cabecera">
+                <h3>Crear usuario</h3>
+
+                <button onClick={cerrarModalUsuario}>
+                    Cerrar
+                </button>
+                </div>
+
+                <form onSubmit={crearUsuario}>
+                <input
+                    type="text"
+                    name="nombre"
+                    value={formUsuario.nombre}
+                    onChange={manejarCambioUsuario}
+                    placeholder="Nombre"
+                    required
+                />
+
+                <input
+                    type="email"
+                    name="correo"
+                    value={formUsuario.correo}
+                    onChange={manejarCambioUsuario}
+                    placeholder="Correo"
+                    required
+                />
+
+                <input
+                    type="password"
+                    name="contrasena"
+                    value={formUsuario.contrasena}
+                    onChange={manejarCambioUsuario}
+                    placeholder="Contraseña"
+                    required
+                />
+
+                <select
+                    name="cod_rol"
+                    value={formUsuario.cod_rol}
+                    onChange={manejarCambioUsuario}
+                    required
+                >
+                    <option value={1}>Admin</option>
+                    <option value={2}>Vendedor</option>
+                    <option value={3}>Usuario</option>
+                </select>
+
+                <button type="submit">
+                    Crear usuario
+                </button>
+                </form>
+            </div>
             </div>
         )}
         </main>

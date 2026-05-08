@@ -30,3 +30,104 @@
   padding: 16px;
   margin-bottom: 14px;
 }
+
+/* ========================= */
+/* CABECERA DE PANEL */
+/* ========================= */
+
+.panel-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 24px;
+}
+
+.panel-cabecera p {
+  color: #cfcfcf;
+}
+
+.panel-cabecera button {
+  padding: 12px 18px;
+  background: #00d084;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: bold;
+}
+
+.panel-cabecera button:hover {
+  background: #00a76f;
+}
+
+/* ========================= */
+/* MODAL */
+/* ========================= */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
+}
+
+.modal-contenido {
+  width: 100%;
+  max-width: 520px;
+
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 12px;
+
+  padding: 24px;
+}
+
+.modal-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.modal-cabecera h3 {
+  margin: 0;
+}
+
+.modal-cabecera button {
+  background: none;
+  border: none;
+  color: #fff;
+}
+
+.modal-cabecera button:hover {
+  color: #00d084;
+}
+
+/* ========================= */
+/* TABS ADMIN */
+/* ========================= */
+
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-tabs button {
+  padding: 10px 16px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.admin-tabs button:hover {
+  background: #00d084;
+  color: #000;
+}
