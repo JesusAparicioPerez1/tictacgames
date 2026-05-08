@@ -104,12 +104,13 @@ const eliminarProducto = async (cod_producto) => {
   return resultado.affectedRows;
 };
 
-// Obtiene productos de un vendedor concreto
+// Obtiene los productos creados por un vendedor concreto
 const obtenerProductosPorUsuario = async (cod_usuario) => {
   const [filas] = await conexionBD.query(
     `SELECT 
       cod_producto,
       nombre_producto,
+      descripcion_producto,
       precio,
       stock,
       plataforma,

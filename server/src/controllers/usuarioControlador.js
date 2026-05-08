@@ -202,11 +202,74 @@ const cambiarEstadoUsuario = async (req, res) => {
   }
 };
 
+// Crear usuario desde panel admin
+const crearUsuarioAdmin = async (req, res) => {
+  try {
+    const {
+      nombre,
+      correo,
+      contrasena,
+      cod_rol,
+    } = req.body;
+
+    // Validación básica
+    if (!nombre || !correo || !contrasena || !cod_rol) {
+      return res.status(400).json({
+        mensaje: 'Faltan datos obligatorios',
+      });
+    }
+
+    // Encriptar contraseña
+    const hash = await bcrypt.hash(contrasena, 10);
+
+    const id = await usuarioModelo.crearUsuarioAdmin({
+      nombre,
+      correo,
+      contrasena: hash,
+      cod_rol,
+    });
+
+    res.status(201).json({
+      mensaje: 'Usuario creado correctamente',
+      cod_usuario: id,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      mensaje: 'Error al crear usuario',
+      error: error.message,
+    });
+  }
+};
+
+// Eliminar usuario definitivamente
+const eliminarUsuario = async (req, res) => {
+  try {
+    const { cod_usuario } = req.params;
+
+    await usuarioModelo.eliminarUsuario(cod_usuario);
+
+    res.json({
+      mensaje: 'Usuario eliminado correctamente',
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      mensaje:
+        'No se puede eliminar el usuario porque tiene datos asociados',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
   listarUsuarios,
-  desactivarUsuario,
   cambiarRolUsuario,
   cambiarEstadoUsuario,
+  crearUsuarioAdmin,
+  eliminarUsuario,
 };
