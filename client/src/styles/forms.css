@@ -30,3 +30,20 @@ form button {
 form button:hover {
   background: #00a76f;
 }
+
+/* ========================= */
+/* AUTH MODAL */
+/* ========================= */
+
+.auth-modal {
+  max-width: 430px;
+}
+
+.btn-secundario {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.btn-secundario:hover {
+  background: #333;
+}

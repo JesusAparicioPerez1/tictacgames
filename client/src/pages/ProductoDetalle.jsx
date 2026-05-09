@@ -36,9 +36,14 @@ function ProductoDetalle() {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      navigate('/login', {
-        state: { from: location },
-      });
+      window.dispatchEvent(
+        new CustomEvent('abrirAuthModal', {
+          detail: {
+            modo: 'login',
+            from: location.pathname,
+          },
+        })
+      );
 
       return;
     }

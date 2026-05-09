@@ -1,106 +1,176 @@
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+
 import { obtenerUsuarioDesdeToken } from '../utils/auth';
 import Footer from '../components/Footer';
+import AuthModal from '../components/AuthModal';
 
 // Layout principal que controla la navegación según el rol del usuario
 function MainLayout() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    // Se obtiene el usuario a partir del token JWT
-    const usuario = obtenerUsuarioDesdeToken();
+  // Se obtiene el usuario a partir del token JWT
+  const usuario = obtenerUsuarioDesdeToken();
 
-    // Función para cerrar sesión
-    const cerrarSesion = () => {
-        localStorage.removeItem('token'); // Elimina el token
-        navigate('/'); // Redirige al inicio
+  // Controla si el modal de autenticación está abierto
+  const [authModalAbierto, setAuthModalAbierto] = useState(false);
+
+  // Define si el modal empieza en login o registro
+  const [modoAuth, setModoAuth] = useState('login');
+
+  // Guarda la ruta a la que se intentaba acceder antes de iniciar sesión
+  const [rutaPendiente, setRutaPendiente] = useState(null);
+
+  // Escucha eventos globales para abrir el modal desde otras páginas
+  useEffect(() => {
+    const abrirAuthDesdeEvento = (event) => {
+      setModoAuth(event.detail?.modo || 'login');
+      setRutaPendiente(event.detail?.from || null);
+      setAuthModalAbierto(true);
     };
 
-    return (
-        <>
-        {/* Cabecera de la aplicación */}
-        <header className="navbar">
-            <nav className="navbar-contenedor">
+    window.addEventListener('abrirAuthModal', abrirAuthDesdeEvento);
 
-            {/* CASO 1: Usuario NO autenticado */}
-            {!usuario && (
-                <>
-                {/* Logo que lleva a la home */}
-                <div className="navbar-logo">
-                    <Link to="/">TicTac Games</Link>
-                </div>
+    return () => {
+      window.removeEventListener('abrirAuthModal', abrirAuthDesdeEvento);
+    };
+  }, []);
 
-                {/* Enlaces disponibles para usuario anónimo */}
-                <div className="navbar-links">
-                    <Link to="/tienda">Tienda</Link>
-                    <Link to="/login">Login</Link>
-                    <Link to="/registro">Registro</Link>
-                </div>
-                </>
-            )}
+  // Abre el modal en modo login
+  const abrirLogin = () => {
+    setModoAuth('login');
+    setRutaPendiente(null);
+    setAuthModalAbierto(true);
+  };
 
-            {/* CASO 2: Usuario registrado */}
-            {usuario && usuario.cod_rol === 3 && (
-                <>
-                <div className="navbar-logo">
-                    <Link to="/">TicTac Games</Link>
-                </div>
+  // Abre el modal en modo registro
+  const abrirRegistro = () => {
+    setModoAuth('registro');
+    setRutaPendiente(null);
+    setAuthModalAbierto(true);
+  };
 
-                {/* Enlaces para usuario que puede comprar */}
-                <div className="navbar-links">
-                    <Link to="/tienda">Tienda</Link>
-                    <Link to="/carrito">Carrito</Link>
-                    <Link to="/mis-pedidos">Mis pedidos</Link>
-                    <button onClick={cerrarSesion}>Cerrar sesión</button>
-                </div>
-                </>
-            )}
+  // Cierra el modal de autenticación
+  const cerrarAuthModal = () => {
+    setAuthModalAbierto(false);
+  };
 
-            {/* CASO 3: Vendedor */}
-            {usuario && usuario.cod_rol === 2 && (
-                <>
-                {/* El vendedor no navega por tienda */}
-                <div className="navbar-logo">
-                    <span>Panel Vendedor</span>
-                </div>
+  // Cierra sesión
+  const cerrarSesion = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
 
-                {/* Solo acceso a su panel */}
-                <div className="navbar-links">
-                    <Link to="/vendedor">Mis productos</Link>
-                    <button onClick={cerrarSesion}>Cerrar sesión</button>
-                </div>
-                </>
-            )}
+  // Redirige después de iniciar sesión
+  const manejarLoginCorrecto = (usuarioLogueado) => {
+    if (rutaPendiente && usuarioLogueado?.cod_rol === 3) {
+      navigate(rutaPendiente);
+      setRutaPendiente(null);
+      return;
+    }
 
-            {/* CASO 4: Administrador */}
-            {usuario && usuario.cod_rol === 1 && (
-                <>
-                {/* Panel de administración */}
-                <div className="navbar-logo">
-                    <span>Panel Admin</span>
-                </div>
+    if (usuarioLogueado?.cod_rol === 1) {
+      navigate('/admin');
+    } else if (usuarioLogueado?.cod_rol === 2) {
+      navigate('/vendedor');
+    } else {
+      navigate('/tienda');
+    }
+  };
 
-                {/* Secciones internas del admin */}
-                <div className="navbar-links">
-                    <Link to="/admin">Usuarios</Link>
-                    <Link to="/admin">Productos</Link>
-                    <Link to="/admin">Plataformas</Link>
-                    <button onClick={cerrarSesion}>Cerrar sesión</button>
-                </div>
-                </>
-            )}
+  return (
+    <>
+      <header className="navbar">
+        <nav className="navbar-contenedor">
+          {!usuario && (
+            <>
+              <div className="navbar-logo">
+                <Link to="/">TicTac Games</Link>
+              </div>
 
-            </nav>
-        </header>
+              <div className="navbar-links">
+                <Link to="/tienda">Tienda</Link>
 
-        {/* Contenido de cada página */}
-        <main className="contenido">
-            <Outlet />
-        </main>
-        {/* Footer solo para anónimo y usuario registrado */}
-        {(!usuario || usuario.cod_rol === 3) && <Footer />}
-        </>
-        
-    );
+                <button type="button" onClick={abrirLogin}>
+                  Login
+                </button>
+
+                <button type="button" onClick={abrirRegistro}>
+                  Registro
+                </button>
+              </div>
+            </>
+          )}
+
+          {usuario && usuario.cod_rol === 3 && (
+            <>
+              <div className="navbar-logo">
+                <Link to="/">TicTac Games</Link>
+              </div>
+
+              <div className="navbar-links">
+                <Link to="/tienda">Tienda</Link>
+                <Link to="/carrito">Carrito</Link>
+                <Link to="/mis-pedidos">Mis pedidos</Link>
+
+                <button type="button" onClick={cerrarSesion}>
+                  Cerrar sesión
+                </button>
+              </div>
+            </>
+          )}
+
+          {usuario && usuario.cod_rol === 2 && (
+            <>
+              <div className="navbar-logo">
+                <span>Panel Vendedor</span>
+              </div>
+
+              <div className="navbar-links">
+                <Link to="/vendedor">Mis productos</Link>
+
+                <button type="button" onClick={cerrarSesion}>
+                  Cerrar sesión
+                </button>
+              </div>
+            </>
+          )}
+
+          {usuario && usuario.cod_rol === 1 && (
+            <>
+              <div className="navbar-logo">
+                <span>Panel Admin</span>
+              </div>
+
+              <div className="navbar-links">
+                <Link to="/admin">Usuarios</Link>
+                <Link to="/admin">Productos</Link>
+                <Link to="/admin">Plataformas</Link>
+
+                <button type="button" onClick={cerrarSesion}>
+                  Cerrar sesión
+                </button>
+              </div>
+            </>
+          )}
+        </nav>
+      </header>
+
+      <main className="contenido">
+        <Outlet />
+      </main>
+
+      {(!usuario || usuario.cod_rol === 3) && <Footer />}
+
+      <AuthModal
+        key={modoAuth}
+        abierto={authModalAbierto}
+        modoInicial={modoAuth}
+        cerrarModal={cerrarAuthModal}
+        onLoginCorrecto={manejarLoginCorrecto}
+      />
+    </>
+  );
 }
 
 export default MainLayout;
