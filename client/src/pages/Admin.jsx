@@ -1,29 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Swal from 'sweetalert2';
 import api from '../services/api';
 
-// Panel de administración con pestañas internas:
-// Usuarios | Productos | Plataformas
+// Panel de administración
 function Admin() {
-  // ===== ESTADO GENERAL =====
+  // =========================
+  // ESTADOS GENERALES
+  // =========================
 
-  // Lista de usuarios
   const [usuarios, setUsuarios] = useState([]);
-
-  // Lista de productos
   const [productos, setProductos] = useState([]);
+  const [plataformas, setPlataformas] = useState([]);
 
-  // Mensajes de estado
   const [mensaje, setMensaje] = useState('');
-
-  // Pestaña activa del panel admin
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
 
-  // ===== MODAL CREAR USUARIO =====
+  // =========================
+  // MODAL USUARIOS
+  // =========================
 
-  // Controla si el modal de creación de usuario está abierto
   const [modalUsuarioAbierto, setModalUsuarioAbierto] = useState(false);
 
-  // Formulario para crear usuario desde admin
   const [formUsuario, setFormUsuario] = useState({
     nombre: '',
     correo: '',
@@ -31,15 +28,13 @@ function Admin() {
     cod_rol: 3,
   });
 
-  // ===== MODAL EDITAR PRODUCTO =====
+  // =========================
+  // MODAL PRODUCTOS
+  // =========================
 
-  // Controla si el modal de edición de producto está abierto
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
-
-  // Producto que se está editando
   const [productoEditando, setProductoEditando] = useState(null);
 
-  // Formulario para editar producto
   const [formProducto, setFormProducto] = useState({
     nombre_producto: '',
     descripcion_producto: '',
@@ -49,20 +44,52 @@ function Admin() {
     plataforma: '',
   });
 
-  // ===== MODAL PRODUCTO DESTACADO =====
+  // =========================
+  // MODAL DESTACADO
+  // =========================
 
-  // Controla si el modal de producto destacado está abierto
   const [modalDestacadoAbierto, setModalDestacadoAbierto] = useState(false);
-
-  // Producto seleccionado para destacar
   const [productoDestacado, setProductoDestacado] = useState(null);
-
-  // Texto promocional del producto destacado
   const [textoPromocion, setTextoPromocion] = useState('');
 
-  // ===== FUNCIONES DE USUARIOS =====
+  // =========================
+  // MODAL PLATAFORMAS
+  // =========================
 
-  // Obtiene todos los usuarios
+  const [modalPlataformaAbierto, setModalPlataformaAbierto] = useState(false);
+  const [plataformaEditando, setPlataformaEditando] = useState(null);
+  const [nombrePlataforma, setNombrePlataforma] = useState('');
+
+  // =========================
+  // SWEETALERT
+  // =========================
+
+  const mostrarExito = (texto) => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Correcto',
+      text: texto,
+      confirmButtonColor: '#00d084',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+  };
+
+  const mostrarError = (texto) => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: texto,
+      confirmButtonColor: '#00d084',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+  };
+
+  // =========================
+  // USUARIOS
+  // =========================
+
   const obtenerUsuarios = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -80,7 +107,6 @@ function Admin() {
     }
   };
 
-  // Cambia el rol de un usuario
   const cambiarRol = async (cod_usuario, cod_rol) => {
     try {
       const token = localStorage.getItem('token');
@@ -95,15 +121,14 @@ function Admin() {
         }
       );
 
-      setMensaje('Rol actualizado correctamente');
+      mostrarExito('Rol actualizado correctamente');
       obtenerUsuarios();
     } catch (error) {
       console.error(error);
-      setMensaje('Error al cambiar el rol');
+      mostrarError('Error al cambiar rol');
     }
   };
 
-  // Activa o desactiva un usuario
   const cambiarEstadoUsuario = async (cod_usuario, activo) => {
     try {
       const token = localStorage.getItem('token');
@@ -118,7 +143,7 @@ function Admin() {
         }
       );
 
-      setMensaje(
+      mostrarExito(
         activo
           ? 'Usuario activado correctamente'
           : 'Usuario desactivado correctamente'
@@ -127,11 +152,10 @@ function Admin() {
       obtenerUsuarios();
     } catch (error) {
       console.error(error);
-      setMensaje('Error al cambiar estado del usuario');
+      mostrarError('Error al cambiar estado');
     }
   };
 
-  // Abre el modal para crear usuario
   const abrirModalUsuario = () => {
     setFormUsuario({
       nombre: '',
@@ -143,7 +167,6 @@ function Admin() {
     setModalUsuarioAbierto(true);
   };
 
-  // Cierra el modal de usuario
   const cerrarModalUsuario = () => {
     setModalUsuarioAbierto(false);
 
@@ -155,7 +178,6 @@ function Admin() {
     });
   };
 
-  // Actualiza campos del formulario de usuario
   const manejarCambioUsuario = (e) => {
     setFormUsuario({
       ...formUsuario,
@@ -163,7 +185,6 @@ function Admin() {
     });
   };
 
-  // Crea un usuario desde el panel admin
   const crearUsuario = async (e) => {
     e.preventDefault();
 
@@ -176,20 +197,36 @@ function Admin() {
         },
       });
 
-      setMensaje('Usuario creado correctamente');
       cerrarModalUsuario();
       obtenerUsuarios();
+      mostrarExito('Usuario creado correctamente');
     } catch (error) {
       console.error(error);
 
-      setMensaje(
+      mostrarError(
         error.response?.data?.mensaje || 'Error al crear usuario'
       );
     }
   };
 
-  // Elimina un usuario definitivamente
   const eliminarUsuario = async (cod_usuario) => {
+    const confirmacion = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción eliminará el usuario definitivamente.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#555',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
 
@@ -199,21 +236,22 @@ function Admin() {
         },
       });
 
-      setMensaje('Usuario eliminado correctamente');
       obtenerUsuarios();
+      mostrarExito('Usuario eliminado correctamente');
     } catch (error) {
       console.error(error);
 
-      setMensaje(
+      mostrarError(
         error.response?.data?.mensaje ||
-          'No se puede eliminar el usuario porque tiene datos asociados'
+          'No se puede eliminar el usuario'
       );
     }
   };
 
-  // ===== FUNCIONES DE PRODUCTOS =====
+  // =========================
+  // PRODUCTOS
+  // =========================
 
-  // Obtiene todos los productos
   const obtenerProductos = async () => {
     try {
       const res = await api.get('/productos');
@@ -224,7 +262,6 @@ function Admin() {
     }
   };
 
-  // Abre el modal de edición de producto
   const abrirModalEditarProducto = (producto) => {
     setProductoEditando(producto.cod_producto);
 
@@ -234,13 +271,12 @@ function Admin() {
       precio: producto.precio || '',
       stock: producto.stock || '',
       tipo_producto: producto.tipo_producto || '',
-      plataforma: producto.plataforma || '',
+      plataforma: producto.nombre_plataforma || producto.plataforma || '',
     });
 
     setModalProductoAbierto(true);
   };
 
-  // Cierra el modal de producto
   const cerrarModalProducto = () => {
     setModalProductoAbierto(false);
     setProductoEditando(null);
@@ -255,7 +291,6 @@ function Admin() {
     });
   };
 
-  // Actualiza campos del formulario de producto
   const manejarCambioProducto = (e) => {
     setFormProducto({
       ...formProducto,
@@ -263,7 +298,6 @@ function Admin() {
     });
   };
 
-  // Guarda los cambios de un producto
   const guardarCambiosProducto = async (e) => {
     e.preventDefault();
 
@@ -286,33 +320,30 @@ function Admin() {
         }
       );
 
-      setMensaje('Producto actualizado correctamente');
       cerrarModalProducto();
       obtenerProductos();
+      mostrarExito('Producto actualizado correctamente');
     } catch (error) {
       console.error(error);
 
-      setMensaje(
+      mostrarError(
         error.response?.data?.mensaje || 'Error al actualizar producto'
       );
     }
   };
 
-  // Abre el modal para configurar producto destacado
   const abrirModalDestacado = (producto) => {
     setProductoDestacado(producto);
     setTextoPromocion(producto.texto_promocion || '');
     setModalDestacadoAbierto(true);
   };
 
-  // Cierra el modal de producto destacado
   const cerrarModalDestacado = () => {
     setModalDestacadoAbierto(false);
     setProductoDestacado(null);
     setTextoPromocion('');
   };
 
-  // Guarda el producto destacado y su texto promocional
   const guardarProductoDestacado = async (e) => {
     e.preventDefault();
 
@@ -332,21 +363,37 @@ function Admin() {
         }
       );
 
-      setMensaje('Producto destacado actualizado');
       cerrarModalDestacado();
       obtenerProductos();
+      mostrarExito('Producto destacado actualizado');
     } catch (error) {
       console.error(error);
 
-      setMensaje(
+      mostrarError(
         error.response?.data?.mensaje ||
           'Error al actualizar producto destacado'
       );
     }
   };
 
-  // Elimina un producto
   const eliminarProducto = async (cod_producto) => {
+    const confirmacion = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar producto?',
+      text: 'Esta acción eliminará el producto seleccionado.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#555',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
 
@@ -356,59 +403,177 @@ function Admin() {
         },
       });
 
-      setMensaje('Producto eliminado correctamente');
       obtenerProductos();
+      mostrarExito('Producto eliminado correctamente');
     } catch (error) {
       console.error(error);
-      setMensaje('Error al eliminar producto');
+      mostrarError('Error al eliminar producto');
     }
   };
 
-  // ===== EFECTOS =====
+  // =========================
+  // PLATAFORMAS
+  // =========================
 
-  // Carga usuarios al entrar en el panel
-  useEffect(() => {
-    const cargarUsuarios = async () => {
-      await obtenerUsuarios();
-    };
+  const obtenerPlataformas = async () => {
+    try {
+      const res = await api.get('/plataformas');
+      setPlataformas(res.data);
+    } catch (error) {
+      console.error(error);
+      mostrarError('Error al cargar plataformas');
+    }
+  };
 
-    cargarUsuarios();
-  }, []);
+  const abrirModalCrearPlataforma = () => {
+    setPlataformaEditando(null);
+    setNombrePlataforma('');
+    setModalPlataformaAbierto(true);
+  };
 
-  // Carga productos cuando se entra en la pestaña productos
-  useEffect(() => {
-    const cargarProductos = async () => {
-      if (seccionActiva === 'productos') {
-        await obtenerProductos();
+  const abrirModalEditarPlataforma = (plataforma) => {
+    setPlataformaEditando(plataforma.cod_plataforma);
+    setNombrePlataforma(plataforma.nombre_plataforma);
+    setModalPlataformaAbierto(true);
+  };
+
+  const cerrarModalPlataforma = () => {
+    setModalPlataformaAbierto(false);
+    setPlataformaEditando(null);
+    setNombrePlataforma('');
+  };
+
+  const guardarPlataforma = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem('token');
+
+      if (plataformaEditando) {
+        await api.put(
+          `/plataformas/${plataformaEditando}`,
+          {
+            nombre_plataforma: nombrePlataforma,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        mostrarExito('Plataforma actualizada correctamente');
+      } else {
+        await api.post(
+          '/plataformas',
+          {
+            nombre_plataforma: nombrePlataforma,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        mostrarExito('Plataforma creada correctamente');
       }
-    };
 
-    cargarProductos();
-  }, [seccionActiva]);
+      cerrarModalPlataforma();
+      obtenerPlataformas();
+    } catch (error) {
+      console.error(error);
+
+      mostrarError(
+        error.response?.data?.mensaje || 'Error al guardar plataforma'
+      );
+    }
+  };
+
+  const eliminarPlataforma = async (cod_plataforma) => {
+    const confirmacion = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar plataforma?',
+      text: 'No podrás eliminarla si tiene productos asociados.',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#555',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      await api.delete(`/plataformas/${cod_plataforma}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      obtenerPlataformas();
+      mostrarExito('Plataforma eliminada correctamente');
+    } catch (error) {
+      console.error(error);
+
+      mostrarError(
+        error.response?.data?.mensaje || 'Error al eliminar plataforma'
+      );
+    }
+  };
+
+  // =========================
+  // CAMBIO DE PESTAÑAS
+  // =========================
+
+  const mostrarUsuarios = () => {
+    setSeccionActiva('usuarios');
+    obtenerUsuarios();
+  };
+
+  const mostrarProductos = () => {
+    setSeccionActiva('productos');
+    obtenerProductos();
+    obtenerPlataformas();
+  };
+
+  const mostrarPlataformas = () => {
+    setSeccionActiva('plataformas');
+    obtenerPlataformas();
+  };
 
   return (
     <main>
       <h2>Panel de Administración</h2>
 
-      {/* Mensaje de estado */}
-      {mensaje && <p className="mensaje-producto">{mensaje}</p>}
+      {mensaje && (
+        <p className="mensaje-producto">
+          {mensaje}
+        </p>
+      )}
 
-      {/* Pestañas del panel admin */}
+      {/* TABS */}
       <div className="admin-tabs">
-        <button onClick={() => setSeccionActiva('usuarios')}>
+        <button onClick={mostrarUsuarios}>
           Usuarios
         </button>
 
-        <button onClick={() => setSeccionActiva('productos')}>
+        <button onClick={mostrarProductos}>
           Productos
         </button>
 
-        <button onClick={() => setSeccionActiva('plataformas')}>
+        <button onClick={mostrarPlataformas}>
           Plataformas
         </button>
       </div>
 
-      {/* SECCIÓN USUARIOS */}
+      {/* USUARIOS */}
       {seccionActiva === 'usuarios' && (
         <section>
           <div className="panel-cabecera">
@@ -427,18 +592,22 @@ function Admin() {
           )}
 
           {usuarios.map((u) => (
-            <div key={u.cod_usuario} className="panel-card">
+            <div
+              key={u.cod_usuario}
+              className="panel-card"
+            >
               <p>
                 <strong>{u.nombre}</strong>
               </p>
 
               <p>{u.correo}</p>
-
               <p>Rol: {u.cod_rol}</p>
 
               <p>
                 Estado:{' '}
-                {Number(u.activo) === 1 ? 'Activo' : 'Desactivado'}
+                {Number(u.activo) === 1
+                  ? 'Activo'
+                  : 'Desactivado'}
               </p>
 
               <button onClick={() => cambiarRol(u.cod_usuario, 1)}>
@@ -479,7 +648,7 @@ function Admin() {
         </section>
       )}
 
-      {/* SECCIÓN PRODUCTOS */}
+      {/* PRODUCTOS */}
       {seccionActiva === 'productos' && (
         <section>
           {productos.length === 0 && (
@@ -487,16 +656,20 @@ function Admin() {
           )}
 
           {productos.map((p) => (
-            <div key={p.cod_producto} className="panel-card">
+            <div
+              key={p.cod_producto}
+              className="panel-card"
+            >
               <h4>{p.nombre_producto}</h4>
 
               <p>{p.descripcion_producto}</p>
-
               <p>Precio: {p.precio} €</p>
-
               <p>Stock: {p.stock}</p>
 
-              <p>Plataforma: {p.plataforma}</p>
+              <p>
+                Plataforma:{' '}
+                {p.nombre_plataforma || p.plataforma}
+              </p>
 
               <p>Tipo: {p.tipo_producto}</p>
 
@@ -525,16 +698,114 @@ function Admin() {
         </section>
       )}
 
-      {/* SECCIÓN PLATAFORMAS */}
+      {/* PLATAFORMAS */}
       {seccionActiva === 'plataformas' && (
-        <section className="panel-card">
-          <h3>Gestión de plataformas</h3>
+        <section>
+          <div className="panel-cabecera">
+            <div>
+              <h3>Plataformas</h3>
+              <p>Gestiona las plataformas disponibles.</p>
+            </div>
 
-          <p>
-            Esta sección queda preparada para gestionar plataformas como
-            Nintendo, PlayStation, Xbox y PC.
-          </p>
+            <button onClick={abrirModalCrearPlataforma}>
+              Crear plataforma
+            </button>
+          </div>
+
+          {plataformas.length === 0 && (
+            <p>No hay plataformas registradas.</p>
+          )}
+
+          {plataformas.map((plataforma) => (
+            <div
+              key={plataforma.cod_plataforma}
+              className="panel-card"
+            >
+              <h4>{plataforma.nombre_plataforma}</h4>
+
+              <p>
+                Estado:{' '}
+                {Number(plataforma.activo) === 1
+                  ? 'Activa'
+                  : 'Desactivada'}
+              </p>
+
+              <button
+                onClick={() =>
+                  abrirModalEditarPlataforma(plataforma)
+                }
+              >
+                Editar
+              </button>
+
+              <button
+                onClick={() =>
+                  eliminarPlataforma(plataforma.cod_plataforma)
+                }
+              >
+                Eliminar
+              </button>
+            </div>
+          ))}
         </section>
+      )}
+
+      {/* MODAL USUARIO */}
+      {modalUsuarioAbierto && (
+        <div className="modal-fondo">
+          <div className="modal-contenido">
+            <div className="modal-cabecera">
+              <h3>Crear usuario</h3>
+
+              <button onClick={cerrarModalUsuario}>
+                Cerrar
+              </button>
+            </div>
+
+            <form onSubmit={crearUsuario}>
+              <input
+                type="text"
+                name="nombre"
+                value={formUsuario.nombre}
+                onChange={manejarCambioUsuario}
+                placeholder="Nombre"
+                required
+              />
+
+              <input
+                type="email"
+                name="correo"
+                value={formUsuario.correo}
+                onChange={manejarCambioUsuario}
+                placeholder="Correo"
+                required
+              />
+
+              <input
+                type="password"
+                name="contrasena"
+                value={formUsuario.contrasena}
+                onChange={manejarCambioUsuario}
+                placeholder="Contraseña"
+                required
+              />
+
+              <select
+                name="cod_rol"
+                value={formUsuario.cod_rol}
+                onChange={manejarCambioUsuario}
+              >
+                <option value={1}>Admin</option>
+                <option value={2}>Vendedor</option>
+                <option value={3}>Usuario</option>
+              </select>
+
+              <button type="submit">
+                Crear usuario
+              </button>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* MODAL EDITAR PRODUCTO */}
@@ -608,73 +879,19 @@ function Admin() {
                 required
               >
                 <option value="">Plataforma</option>
-                <option value="Nintendo">Nintendo</option>
-                <option value="PlayStation">PlayStation</option>
-                <option value="Xbox">Xbox</option>
-                <option value="PC">PC</option>
+
+                {plataformas.map((plataforma) => (
+                  <option
+                    key={plataforma.cod_plataforma}
+                    value={plataforma.nombre_plataforma}
+                  >
+                    {plataforma.nombre_plataforma}
+                  </option>
+                ))}
               </select>
 
               <button type="submit">
                 Guardar cambios
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL CREAR USUARIO */}
-      {modalUsuarioAbierto && (
-        <div className="modal-fondo">
-          <div className="modal-contenido">
-            <div className="modal-cabecera">
-              <h3>Crear usuario</h3>
-
-              <button onClick={cerrarModalUsuario}>
-                Cerrar
-              </button>
-            </div>
-
-            <form onSubmit={crearUsuario}>
-              <input
-                type="text"
-                name="nombre"
-                value={formUsuario.nombre}
-                onChange={manejarCambioUsuario}
-                placeholder="Nombre"
-                required
-              />
-
-              <input
-                type="email"
-                name="correo"
-                value={formUsuario.correo}
-                onChange={manejarCambioUsuario}
-                placeholder="Correo"
-                required
-              />
-
-              <input
-                type="password"
-                name="contrasena"
-                value={formUsuario.contrasena}
-                onChange={manejarCambioUsuario}
-                placeholder="Contraseña"
-                required
-              />
-
-              <select
-                name="cod_rol"
-                value={formUsuario.cod_rol}
-                onChange={manejarCambioUsuario}
-                required
-              >
-                <option value={1}>Admin</option>
-                <option value={2}>Vendedor</option>
-                <option value={3}>Usuario</option>
-              </select>
-
-              <button type="submit">
-                Crear usuario
               </button>
             </form>
           </div>
@@ -711,6 +928,43 @@ function Admin() {
 
               <button type="submit">
                 Guardar destacado
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PLATAFORMA */}
+      {modalPlataformaAbierto && (
+        <div className="modal-fondo">
+          <div className="modal-contenido">
+            <div className="modal-cabecera">
+              <h3>
+                {plataformaEditando
+                  ? 'Editar plataforma'
+                  : 'Crear plataforma'}
+              </h3>
+
+              <button onClick={cerrarModalPlataforma}>
+                Cerrar
+              </button>
+            </div>
+
+            <form onSubmit={guardarPlataforma}>
+              <input
+                type="text"
+                value={nombrePlataforma}
+                onChange={(e) =>
+                  setNombrePlataforma(e.target.value)
+                }
+                placeholder="Nombre de plataforma"
+                required
+              />
+
+              <button type="submit">
+                {plataformaEditando
+                  ? 'Guardar cambios'
+                  : 'Crear plataforma'}
               </button>
             </form>
           </div>

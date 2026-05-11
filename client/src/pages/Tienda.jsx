@@ -7,6 +7,7 @@ import obtenerImagenProducto from '../utils/obtenerImagenProducto';
 function Tienda() {
   const [productos, setProductos] = useState([]);
   const [mensaje, setMensaje] = useState('');
+
   // Permite leer parámetros de la URL
   const [searchParams] = useSearchParams();
 
@@ -74,9 +75,20 @@ function Tienda() {
 
   return (
     <main>
-      <h2>Tienda</h2>
+      <div className="tienda-cabecera">
+        <div>
+          <h2>Tienda</h2>
+          <p>
+            Explora videojuegos, DLCs y tarjetas digitales.
+          </p>
+        </div>
 
-      {mensaje && <p>{mensaje}</p>}
+        <span>
+          {productosFiltrados.length} producto(s)
+        </span>
+      </div>
+
+      {mensaje && <p className="mensaje-producto">{mensaje}</p>}
 
       <section className="tienda-layout">
         <aside className="filtros">
@@ -127,45 +139,58 @@ function Tienda() {
             step="0.01"
           />
 
-          <button onClick={limpiarFiltros}>
+          <button type="button" onClick={limpiarFiltros}>
             Limpiar filtros
           </button>
         </aside>
 
         <div className="productos-grid">
           {productosFiltrados.map((producto) => (
-            <div key={producto.cod_producto} className="producto-card">
-              <img
-                src={obtenerImagenProducto(producto.plataforma)}
-                alt={producto.nombre_producto}
-                className="producto-imagen"
-              />
+            <article key={producto.cod_producto} className="producto-card">
+              <div className="producto-imagen-contenedor">
+                <img
+                  src={obtenerImagenProducto(producto.plataforma)}
+                  alt={producto.nombre_producto}
+                  className="producto-imagen"
+                />
 
-              <h3>{producto.nombre_producto}</h3>
+                <span className="producto-badge-plataforma">
+                  {producto.plataforma}
+                </span>
+              </div>
 
-              <p className="descripcion">
-                {producto.descripcion_producto}
-              </p>
+              <div className="producto-card-contenido">
+                <span className="producto-tipo">
+                  {producto.tipo_producto}
+                </span>
 
-              <p className="precio">
-                {producto.precio} €
-              </p>
+                <h3>{producto.nombre_producto}</h3>
 
-              <p className="categorias">
-                {producto.plataforma} · {producto.tipo_producto}
-              </p>
+                <p className="descripcion">
+                  {producto.descripcion_producto}
+                </p>
 
-              <Link
-                to={`/producto/${producto.cod_producto}`}
-                className="btn-carrito"
-              >
-                Ver detalle
-              </Link>
-            </div>
+                <div className="producto-card-footer">
+                  <p className="precio">
+                    {producto.precio} €
+                  </p>
+                </div>
+
+                <Link
+                  to={`/producto/${producto.cod_producto}`}
+                  className="btn-carrito"
+                >
+                  Ver detalle
+                </Link>
+              </div>
+            </article>
           ))}
 
           {productosFiltrados.length === 0 && (
-            <p>No hay productos que coincidan con los filtros.</p>
+            <div className="sin-resultados">
+              <h3>No hay productos que coincidan con los filtros.</h3>
+              <p>Prueba a cambiar la búsqueda o limpiar los filtros.</p>
+            </div>
           )}
         </div>
       </section>

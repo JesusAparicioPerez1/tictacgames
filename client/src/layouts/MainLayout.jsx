@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { FaStore, FaUser, FaShoppingCart, FaClipboardList, FaBoxOpen, FaUsersCog } from 'react-icons/fa';
+import { MdOutlineAppRegistration, MdLogout } from 'react-icons/md';
 
 import { obtenerUsuarioDesdeToken } from '../utils/auth';
 import Footer from '../components/Footer';
@@ -89,14 +91,19 @@ function MainLayout() {
               </div>
 
               <div className="navbar-links">
-                <Link to="/tienda">Tienda</Link>
+                <Link to="/tienda">
+                  <FaStore />
+                  Tienda
+                </Link>
 
                 <button type="button" onClick={abrirLogin}>
-                  Login
+                  <FaUser />
+                  Iniciar sesión
                 </button>
 
                 <button type="button" onClick={abrirRegistro}>
-                  Registro
+                  <MdOutlineAppRegistration />
+                  Regístrate
                 </button>
               </div>
             </>
@@ -109,11 +116,23 @@ function MainLayout() {
               </div>
 
               <div className="navbar-links">
-                <Link to="/tienda">Tienda</Link>
-                <Link to="/carrito">Carrito</Link>
-                <Link to="/mis-pedidos">Mis pedidos</Link>
+                <Link to="/tienda">
+                  <FaStore />
+                  Tienda
+                </Link>
+
+                <Link to="/carrito">
+                  <FaShoppingCart />
+                  Carrito
+                </Link>
+
+                <Link to="/mis-pedidos">
+                  <FaClipboardList />
+                  Mis pedidos
+                </Link>
 
                 <button type="button" onClick={cerrarSesion}>
+                  <MdLogout />
                   Cerrar sesión
                 </button>
               </div>
@@ -127,9 +146,13 @@ function MainLayout() {
               </div>
 
               <div className="navbar-links">
-                <Link to="/vendedor">Mis productos</Link>
+                <Link to="/vendedor">
+                  <FaBoxOpen />
+                  Mis productos
+                </Link>
 
                 <button type="button" onClick={cerrarSesion}>
+                  <MdLogout />
                   Cerrar sesión
                 </button>
               </div>
@@ -143,11 +166,23 @@ function MainLayout() {
               </div>
 
               <div className="navbar-links">
-                <Link to="/admin">Usuarios</Link>
-                <Link to="/admin">Productos</Link>
-                <Link to="/admin">Plataformas</Link>
+                <Link to="/admin">
+                  <FaUsersCog />
+                  Usuarios
+                </Link>
+
+                <Link to="/admin">
+                  <FaBoxOpen />
+                  Productos
+                </Link>
+
+                <Link to="/admin">
+                  <FaStore />
+                  Plataformas
+                </Link>
 
                 <button type="button" onClick={cerrarSesion}>
+                  <MdLogout />
                   Cerrar sesión
                 </button>
               </div>

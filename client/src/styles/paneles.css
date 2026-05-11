@@ -60,6 +60,21 @@
   background: #00a76f;
 }
 
+.pedido-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  margin-bottom: 16px;
+}
+
+.pedido-fecha {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
 /* ========================= */
 /* MODAL */
 /* ========================= */

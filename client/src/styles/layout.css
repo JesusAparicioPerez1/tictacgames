@@ -1,42 +1,113 @@
 /* ========================= */
+/* LAYOUT GENERAL */
+/* ========================= */
+
+body {
+  margin: 0;
+  padding: 0;
+
+  background: #0f1115;
+  color: white;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}
+
+/* ========================= */
+/* CONTENIDO PRINCIPAL */
+/* ========================= */
+
+.contenido {
+  min-height: 100vh;
+
+  max-width: 1280px;
+
+  width: 100%;
+
+  margin: 0 auto;
+
+  padding: 30px 20px;
+}
+
+/* ========================= */
 /* NAVBAR */
 /* ========================= */
 
 .navbar {
-  width: 100%;
-  background: #181818;
-  border-bottom: 1px solid #333;
+  background: #111827;
+
+  border-bottom: 1px solid #1f2937;
+
+  padding: 18px 30px;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 1000;
 }
 
 .navbar-contenedor {
-  max-width: 1200px;
+  max-width: 1400px;
+
   margin: 0 auto;
-  padding: 16px 32px;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+/* ========================= */
+/* LOGO */
+/* ========================= */
+
 .navbar-logo a,
 .navbar-logo span {
   font-size: 24px;
   font-weight: bold;
-  color: #ffffff;
+
+  color: white;
+
+  text-decoration: none;
 }
+
+/* ========================= */
+/* ENLACES */
+/* ========================= */
 
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
 }
 
 .navbar-links a,
 .navbar-links button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
   color: #ffffff;
+
+  text-decoration: none;
+
   background: none;
   border: none;
+
   font-size: 16px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: 0.2s;
 }
 
 .navbar-links a:hover,
@@ -45,13 +116,11 @@
 }
 
 /* ========================= */
-/* CONTENIDO */
+/* BOTONES GENERALES */
 /* ========================= */
 
-.contenido {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px;
+button {
+  font-family: inherit;
 }
 
 /* ========================= */
@@ -59,13 +128,24 @@
 /* ========================= */
 
 @media (max-width: 768px) {
+
+  .navbar {
+    padding: 18px 20px;
+  }
+
   .navbar-contenedor {
     flex-direction: column;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 20px;
   }
 
   .navbar-links {
     flex-wrap: wrap;
-    justify-content: center;
+    gap: 16px;
+  }
+
+  .navbar-logo a,
+  .navbar-logo span {
+    font-size: 22px;
   }
 }
