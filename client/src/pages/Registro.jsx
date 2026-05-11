@@ -5,7 +5,6 @@ import api from '../services/api';
 function Registro() {
     const [formulario, setFormulario] = useState({
         nombre: '',
-        apellido: '',
         correo: '',
         contrasena: '',
     });
@@ -55,17 +54,7 @@ function Registro() {
                 required
             />
             </div>
-
-            <div>
-            <label>Apellido</label>
-            <input
-                type="text"
-                name="apellido"
-                value={formulario.apellido}
-                onChange={manejarCambio}
-            />
-            </div>
-
+            
             <div>
             <label>Correo</label>
             <input
