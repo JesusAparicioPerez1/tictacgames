@@ -1,37 +1,51 @@
 const conexionBD = require('../config/conexionBD');
 
-// Obtiene todos los productos con el nombre de la plataforma
+// Obtiene todos los productos con el nombre de la plataforma,
+// el vendedor y sus categorías asociadas
 const obtenerProductos = async () => {
   const [filas] = await conexionBD.query(`
     SELECT
       p.*,
       pl.nombre_plataforma,
-      u.nombre AS vendedor
+      u.nombre AS vendedor,
+      GROUP_CONCAT(c.nombre_categoria SEPARATOR ', ') AS categorias
     FROM producto p
     LEFT JOIN plataforma pl
       ON p.cod_plataforma = pl.cod_plataforma
     LEFT JOIN usuario u
       ON p.cod_usuario = u.cod_usuario
+    LEFT JOIN producto_categoria pc
+      ON p.cod_producto = pc.cod_producto
+    LEFT JOIN categoria c
+      ON pc.cod_categoria = c.cod_categoria
+    GROUP BY p.cod_producto
     ORDER BY p.cod_producto DESC
   `);
 
   return filas;
 };
 
-// Obtiene un producto por su ID
+// Obtiene un producto por su ID con el nombre de la plataforma,
+// el vendedor y sus categorías asociadas
 const obtenerProductoPorId = async (cod_producto) => {
   const [filas] = await conexionBD.query(
     `
     SELECT
       p.*,
       pl.nombre_plataforma,
-      u.nombre AS vendedor
+      u.nombre AS vendedor,
+      GROUP_CONCAT(c.nombre_categoria SEPARATOR ', ') AS categorias
     FROM producto p
     LEFT JOIN plataforma pl
       ON p.cod_plataforma = pl.cod_plataforma
     LEFT JOIN usuario u
       ON p.cod_usuario = u.cod_usuario
+    LEFT JOIN producto_categoria pc
+      ON p.cod_producto = pc.cod_producto
+    LEFT JOIN categoria c
+      ON pc.cod_categoria = c.cod_categoria
     WHERE p.cod_producto = ?
+    GROUP BY p.cod_producto
     `,
     [cod_producto]
   );
@@ -48,11 +62,17 @@ const obtenerProductosPorUsuario = async (cod_usuario) => {
     `
     SELECT
       p.*,
-      pl.nombre_plataforma
+      pl.nombre_plataforma,
+      GROUP_CONCAT(c.nombre_categoria SEPARATOR ', ') AS categorias
     FROM producto p
     LEFT JOIN plataforma pl
       ON p.cod_plataforma = pl.cod_plataforma
+    LEFT JOIN producto_categoria pc
+      ON p.cod_producto = pc.cod_producto
+    LEFT JOIN categoria c
+      ON pc.cod_categoria = c.cod_categoria
     WHERE p.cod_usuario = ?
+    GROUP BY p.cod_producto
     ORDER BY p.cod_producto DESC
     `,
     [cod_usuario]
@@ -158,11 +178,17 @@ const obtenerProductoDestacado = async () => {
   const [filas] = await conexionBD.query(`
     SELECT
       p.*,
-      pl.nombre_plataforma
+      pl.nombre_plataforma,
+      GROUP_CONCAT(c.nombre_categoria SEPARATOR ', ') AS categorias
     FROM producto p
     LEFT JOIN plataforma pl
       ON p.cod_plataforma = pl.cod_plataforma
+    LEFT JOIN producto_categoria pc
+      ON p.cod_producto = pc.cod_producto
+    LEFT JOIN categoria c
+      ON pc.cod_categoria = c.cod_categoria
     WHERE p.destacado = true
+    GROUP BY p.cod_producto
     LIMIT 1
   `);
 

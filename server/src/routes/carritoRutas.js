@@ -21,6 +21,22 @@ router.get(
   carritoControlador.verCarrito
 );
 
+// Usuario registrado puede actualizar la cantidad de un producto del carrito
+router.put(
+  '/:cod_producto',
+  verificarToken,
+  verificarRol(3),
+  carritoControlador.actualizarCantidadCarrito
+);
+
+// Usuario registrado puede eliminar un producto del carrito
+router.delete(
+  '/:cod_producto',
+  verificarToken,
+  verificarRol(3),
+  carritoControlador.eliminarProductoCarrito
+);
+
 // Usuario registrado puede confirmar pedido
 router.post(
   '/confirmar',

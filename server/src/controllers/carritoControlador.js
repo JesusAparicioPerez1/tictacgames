@@ -16,7 +16,10 @@ const agregarAlCarrito = async (req, res) => {
       });
     }
 
-    const producto = await productoModelo.obtenerProductoPorCodigo(cod_producto);
+    const producto =
+      await productoModelo.obtenerProductoPorCodigo(
+        cod_producto
+      );
 
     if (!producto) {
       return res.status(404).json({
@@ -40,6 +43,11 @@ const agregarAlCarrito = async (req, res) => {
         nombre_producto: producto.nombre_producto,
         precio_unitario: producto.precio,
         cantidad,
+
+        // Información necesaria para el frontend
+        plataforma: producto.plataforma,
+        nombre_plataforma:
+          producto.nombre_plataforma,
       });
     }
 
@@ -49,7 +57,8 @@ const agregarAlCarrito = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      mensaje: 'Error al añadir producto al carrito',
+      mensaje:
+        'Error al añadir producto al carrito',
       error: error.message,
     });
   }
@@ -64,38 +73,126 @@ const verCarrito = (req, res) => {
   });
 };
 
+// Actualiza la cantidad de un producto del carrito
+const actualizarCantidadCarrito = (
+  req,
+  res
+) => {
+  const codUsuario = req.usuario.cod_usuario;
+
+  const codProducto = Number(
+    req.params.cod_producto
+  );
+
+  const { cantidad } = req.body;
+
+  if (!cantidad || Number(cantidad) < 1) {
+    return res.status(400).json({
+      mensaje:
+        'La cantidad debe ser mayor que 0',
+    });
+  }
+
+  const carrito = carritos[codUsuario] || [];
+
+  const productoEnCarrito = carrito.find(
+    (item) =>
+      Number(item.cod_producto) === codProducto
+  );
+
+  if (!productoEnCarrito) {
+    return res.status(404).json({
+      mensaje:
+        'Producto no encontrado en el carrito',
+    });
+  }
+
+  productoEnCarrito.cantidad = Number(
+    cantidad
+  );
+
+  res.json({
+    mensaje:
+      'Cantidad actualizada correctamente',
+    carrito,
+  });
+};
+
+// Elimina un producto del carrito
+const eliminarProductoCarrito = (
+  req,
+  res
+) => {
+  const codUsuario = req.usuario.cod_usuario;
+
+  const codProducto = Number(
+    req.params.cod_producto
+  );
+
+  const carrito = carritos[codUsuario] || [];
+
+  const carritoActualizado = carrito.filter(
+    (item) =>
+      Number(item.cod_producto) !== codProducto
+  );
+
+  carritos[codUsuario] =
+    carritoActualizado;
+
+  res.json({
+    mensaje:
+      'Producto eliminado del carrito',
+    carrito: carritoActualizado,
+  });
+};
+
 // Convierte el carrito en pedido
-const confirmarPedido = async (req, res) => {
+const confirmarPedido = async (
+  req,
+  res
+) => {
   try {
-    const codUsuario = req.usuario.cod_usuario;
+    const codUsuario =
+      req.usuario.cod_usuario;
+
     const carrito = carritos[codUsuario];
 
-    if (!carrito || carrito.length === 0) {
+    if (
+      !carrito ||
+      carrito.length === 0
+    ) {
       return res.status(400).json({
         mensaje: 'El carrito está vacío',
       });
     }
 
-    const codPedido = await pedidoModelo.crearPedido(codUsuario);
+    const codPedido =
+      await pedidoModelo.crearPedido(
+        codUsuario
+      );
 
     for (const item of carrito) {
       await pedidoModelo.crearLineaPedido({
         cod_pedido: codPedido,
         cod_producto: item.cod_producto,
         cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
+        precio_unitario:
+          item.precio_unitario,
       });
     }
 
+    // Vacía el carrito tras crear el pedido
     carritos[codUsuario] = [];
 
     res.status(201).json({
-      mensaje: 'Pedido creado correctamente',
+      mensaje:
+        'Pedido creado correctamente',
       cod_pedido: codPedido,
     });
   } catch (error) {
     res.status(500).json({
-      mensaje: 'Error al confirmar pedido',
+      mensaje:
+        'Error al confirmar pedido',
       error: error.message,
     });
   }
@@ -104,5 +201,7 @@ const confirmarPedido = async (req, res) => {
 module.exports = {
   agregarAlCarrito,
   verCarrito,
+  actualizarCantidadCarrito,
+  eliminarProductoCarrito,
   confirmarPedido,
 };
