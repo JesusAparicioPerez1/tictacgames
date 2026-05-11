@@ -9,12 +9,17 @@ const crearProducto = async (req, res) => {
       precio,
       stock,
       tipo_producto,
-      plataforma,
+      cod_plataforma,
     } = req.body;
 
     const cod_usuario = req.usuario.cod_usuario;
 
-    if (!nombre_producto || !precio || !tipo_producto || !plataforma) {
+    if (
+      !nombre_producto ||
+      !precio ||
+      !tipo_producto ||
+      !cod_plataforma
+    ) {
       return res.status(400).json({
         mensaje: 'Faltan datos obligatorios',
       });
@@ -26,7 +31,7 @@ const crearProducto = async (req, res) => {
       precio,
       stock,
       tipo_producto,
-      plataforma,
+      cod_plataforma,
       cod_usuario,
     });
 
@@ -47,6 +52,7 @@ const crearProducto = async (req, res) => {
 const listarProductos = async (req, res) => {
   try {
     const productos = await productoModelo.obtenerProductos();
+
     res.json(productos);
   } catch (error) {
     res.status(500).json({
@@ -60,10 +66,12 @@ const listarProductos = async (req, res) => {
 const editarProducto = async (req, res) => {
   try {
     const { cod_producto } = req.params;
+
     const codUsuario = req.usuario.cod_usuario;
     const codRol = req.usuario.cod_rol;
 
-    const producto = await productoModelo.obtenerProductoPorCodigo(cod_producto);
+    const producto =
+      await productoModelo.obtenerProductoPorCodigo(cod_producto);
 
     if (!producto) {
       return res.status(404).json({
@@ -80,7 +88,37 @@ const editarProducto = async (req, res) => {
       });
     }
 
-    await productoModelo.actualizarProducto(cod_producto, req.body);
+    const {
+      nombre_producto,
+      descripcion_producto,
+      precio,
+      stock,
+      tipo_producto,
+      cod_plataforma,
+    } = req.body;
+
+    if (
+      !nombre_producto ||
+      !precio ||
+      !tipo_producto ||
+      !cod_plataforma
+    ) {
+      return res.status(400).json({
+        mensaje: 'Faltan datos obligatorios',
+      });
+    }
+
+    await productoModelo.actualizarProducto(
+      cod_producto,
+      {
+        nombre_producto,
+        descripcion_producto,
+        precio,
+        stock,
+        tipo_producto,
+        cod_plataforma,
+      }
+    );
 
     res.json({
       mensaje: 'Producto actualizado correctamente',
@@ -98,10 +136,12 @@ const editarProducto = async (req, res) => {
 const eliminarProducto = async (req, res) => {
   try {
     const { cod_producto } = req.params;
+
     const codUsuario = req.usuario.cod_usuario;
     const codRol = req.usuario.cod_rol;
 
-    const producto = await productoModelo.obtenerProductoPorCodigo(cod_producto);
+    const producto =
+      await productoModelo.obtenerProductoPorCodigo(cod_producto);
 
     if (!producto) {
       return res.status(404).json({
@@ -132,13 +172,13 @@ const eliminarProducto = async (req, res) => {
   }
 };
 
-
-// Lista productos del usuario autenticado (vendedor o admin)
+// Lista productos del usuario autenticado
 const listarMisProductos = async (req, res) => {
   try {
     const cod_usuario = req.usuario.cod_usuario;
 
-    const productos = await productoModelo.obtenerProductosPorUsuario(cod_usuario);
+    const productos =
+      await productoModelo.obtenerProductosPorUsuario(cod_usuario);
 
     res.json(productos);
   } catch (error) {
@@ -151,10 +191,11 @@ const listarMisProductos = async (req, res) => {
 
 // Devuelve el detalle de un producto concreto
 const obtenerDetalleProducto = async (req, res) => {
-try {
+  try {
     const { cod_producto } = req.params;
 
-    const producto = await productoModelo.obtenerProductoPorCodigo(cod_producto);
+    const producto =
+      await productoModelo.obtenerProductoPorCodigo(cod_producto);
 
     if (!producto) {
       return res.status(404).json({
@@ -189,12 +230,8 @@ const obtenerProductoDestacado = async (req, res) => {
 };
 
 // Actualiza el producto destacado desde admin
-const actualizarProductoDestacado = async (
-  req,
-  res
-) => {
+const actualizarProductoDestacado = async (req, res) => {
   try {
-
     const { cod_producto } = req.params;
 
     const {
@@ -209,17 +246,14 @@ const actualizarProductoDestacado = async (
     );
 
     res.json({
-      mensaje:
-        'Producto destacado actualizado correctamente',
+      mensaje: 'Producto destacado actualizado correctamente',
     });
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      mensaje:
-        'Error al actualizar producto destacado',
+      mensaje: 'Error al actualizar producto destacado',
       error: error.message,
     });
   }

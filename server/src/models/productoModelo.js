@@ -1,57 +1,97 @@
 const conexionBD = require('../config/conexionBD');
 
-// Obtiene todos los productos
+// Obtiene todos los productos con el nombre de la plataforma
 const obtenerProductos = async () => {
-  const [filas] = await conexionBD.query(
-    `SELECT *
-     FROM producto
-     ORDER BY cod_producto DESC`
-  );
+  const [filas] = await conexionBD.query(`
+    SELECT
+      p.*,
+      pl.nombre_plataforma,
+      u.nombre AS vendedor
+    FROM producto p
+    LEFT JOIN plataforma pl
+      ON p.cod_plataforma = pl.cod_plataforma
+    LEFT JOIN usuario u
+      ON p.cod_usuario = u.cod_usuario
+    ORDER BY p.cod_producto DESC
+  `);
 
   return filas;
 };
 
-// Obtiene un producto por ID
+// Obtiene un producto por su ID
 const obtenerProductoPorId = async (cod_producto) => {
   const [filas] = await conexionBD.query(
-    `SELECT *
-     FROM producto
-     WHERE cod_producto = ?`,
+    `
+    SELECT
+      p.*,
+      pl.nombre_plataforma,
+      u.nombre AS vendedor
+    FROM producto p
+    LEFT JOIN plataforma pl
+      ON p.cod_plataforma = pl.cod_plataforma
+    LEFT JOIN usuario u
+      ON p.cod_usuario = u.cod_usuario
+    WHERE p.cod_producto = ?
+    `,
     [cod_producto]
   );
 
   return filas[0];
 };
 
-// Crear producto
+// Alias para mantener compatibilidad con controladores antiguos
+const obtenerProductoPorCodigo = obtenerProductoPorId;
+
+// Obtiene los productos creados por un vendedor concreto
+const obtenerProductosPorUsuario = async (cod_usuario) => {
+  const [filas] = await conexionBD.query(
+    `
+    SELECT
+      p.*,
+      pl.nombre_plataforma
+    FROM producto p
+    LEFT JOIN plataforma pl
+      ON p.cod_plataforma = pl.cod_plataforma
+    WHERE p.cod_usuario = ?
+    ORDER BY p.cod_producto DESC
+    `,
+    [cod_usuario]
+  );
+
+  return filas;
+};
+
+// Crea un nuevo producto
 const crearProducto = async ({
   nombre_producto,
   descripcion_producto,
   precio,
   stock,
   tipo_producto,
-  plataforma,
+  cod_plataforma,
   cod_usuario,
 }) => {
   const [resultado] = await conexionBD.query(
-    `INSERT INTO producto
+    `
+    INSERT INTO producto
     (
       nombre_producto,
       descripcion_producto,
       precio,
       stock,
       tipo_producto,
-      plataforma,
+      cod_plataforma,
       cod_usuario
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
     [
       nombre_producto,
       descripcion_producto,
       precio,
       stock,
       tipo_producto,
-      plataforma,
+      cod_plataforma,
       cod_usuario,
     ]
   );
@@ -59,7 +99,7 @@ const crearProducto = async ({
   return resultado.insertId;
 };
 
-// Editar producto
+// Edita un producto existente
 const editarProducto = async (
   cod_producto,
   {
@@ -68,26 +108,28 @@ const editarProducto = async (
     precio,
     stock,
     tipo_producto,
-    plataforma,
+    cod_plataforma,
   }
 ) => {
   const [resultado] = await conexionBD.query(
-    `UPDATE producto
-     SET
+    `
+    UPDATE producto
+    SET
       nombre_producto = ?,
       descripcion_producto = ?,
       precio = ?,
       stock = ?,
       tipo_producto = ?,
-      plataforma = ?
-     WHERE cod_producto = ?`,
+      cod_plataforma = ?
+    WHERE cod_producto = ?
+    `,
     [
       nombre_producto,
       descripcion_producto,
       precio,
       stock,
       tipo_producto,
-      plataforma,
+      cod_plataforma,
       cod_producto,
     ]
   );
@@ -95,25 +137,34 @@ const editarProducto = async (
   return resultado.affectedRows;
 };
 
-// Eliminar producto
+// Alias para mantener compatibilidad con controladores antiguos
+const actualizarProducto = editarProducto;
+
+// Elimina un producto
 const eliminarProducto = async (cod_producto) => {
   const [resultado] = await conexionBD.query(
-    `DELETE FROM producto
-     WHERE cod_producto = ?`,
+    `
+    DELETE FROM producto
+    WHERE cod_producto = ?
+    `,
     [cod_producto]
   );
 
   return resultado.affectedRows;
 };
 
-// Obtiene producto destacado
+// Obtiene el producto destacado
 const obtenerProductoDestacado = async () => {
-  const [filas] = await conexionBD.query(
-    `SELECT *
-     FROM producto
-     WHERE destacado = TRUE
-     LIMIT 1`
-  );
+  const [filas] = await conexionBD.query(`
+    SELECT
+      p.*,
+      pl.nombre_plataforma
+    FROM producto p
+    LEFT JOIN plataforma pl
+      ON p.cod_plataforma = pl.cod_plataforma
+    WHERE p.destacado = true
+    LIMIT 1
+  `);
 
   return filas[0];
 };
@@ -124,25 +175,20 @@ const actualizarProductoDestacado = async (
   destacado,
   texto_promocion
 ) => {
+  await conexionBD.query(`
+    UPDATE producto
+    SET destacado = false
+  `);
 
-  // Quitamos destacado a todos
-  await conexionBD.query(
-    `UPDATE producto
-     SET destacado = FALSE`
-  );
-
-  // Marcamos el seleccionado
   const [resultado] = await conexionBD.query(
-    `UPDATE producto
-     SET
+    `
+    UPDATE producto
+    SET
       destacado = ?,
       texto_promocion = ?
-     WHERE cod_producto = ?`,
-    [
-      destacado,
-      texto_promocion,
-      cod_producto,
-    ]
+    WHERE cod_producto = ?
+    `,
+    [destacado, texto_promocion, cod_producto]
   );
 
   return resultado.affectedRows;
@@ -151,8 +197,11 @@ const actualizarProductoDestacado = async (
 module.exports = {
   obtenerProductos,
   obtenerProductoPorId,
+  obtenerProductoPorCodigo,
+  obtenerProductosPorUsuario,
   crearProducto,
   editarProducto,
+  actualizarProducto,
   eliminarProducto,
   obtenerProductoDestacado,
   actualizarProductoDestacado,
