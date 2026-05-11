@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { FaStore, FaUser, FaShoppingCart, FaClipboardList, FaBoxOpen, FaUsersCog } from 'react-icons/fa';
+import { FaStore, FaUser, FaShoppingCart, FaClipboardList, FaBoxOpen } from 'react-icons/fa';
 import { MdOutlineAppRegistration, MdLogout } from 'react-icons/md';
 
 import { obtenerUsuarioDesdeToken } from '../utils/auth';
@@ -161,33 +161,18 @@ function MainLayout() {
 
           {usuario && usuario.cod_rol === 1 && (
             <>
-              <div className="navbar-logo">
+                <div className="navbar-logo">
                 <span>Panel Admin</span>
-              </div>
+                </div>
 
-              <div className="navbar-links">
-                <Link to="/admin">
-                  <FaUsersCog />
-                  Usuarios
-                </Link>
-
-                <Link to="/admin">
-                  <FaBoxOpen />
-                  Productos
-                </Link>
-
-                <Link to="/admin">
-                  <FaStore />
-                  Plataformas
-                </Link>
-
+                <div className="navbar-links">
                 <button type="button" onClick={cerrarSesion}>
-                  <MdLogout />
-                  Cerrar sesión
+                    <MdLogout />
+                    Cerrar sesión
                 </button>
-              </div>
+                </div>
             </>
-          )}
+            )}
         </nav>
       </header>
 

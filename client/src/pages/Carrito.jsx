@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import api from '../services/api';
+import obtenerImagenProducto from '../utils/obtenerImagenProducto';
 
 // Página del carrito del usuario registrado
 function Carrito() {
@@ -12,7 +13,7 @@ function Carrito() {
 
   // Cargar carrito al entrar en la página
   useEffect(() => {
-    const obtenerCarrito = async () => {
+    const cargarCarrito = async () => {
       try {
         const token = localStorage.getItem('token');
 
@@ -29,7 +30,7 @@ function Carrito() {
       }
     };
 
-    obtenerCarrito();
+    cargarCarrito();
   }, []);
 
   // Calcula el total del carrito
@@ -52,6 +53,7 @@ function Carrito() {
       color: '#ffffff',
     });
 
+    // Si el usuario cancela, no se realiza el pedido
     if (!confirmacion.isConfirmed) {
       return;
     }
@@ -69,6 +71,7 @@ function Carrito() {
         }
       );
 
+      // Vacía el carrito tras confirmar el pedido
       setCarrito([]);
 
       Swal.fire({
@@ -101,35 +104,68 @@ function Carrito() {
     <main>
       <h2>Carrito</h2>
 
-      {mensaje && <p className="mensaje-producto">{mensaje}</p>}
+      {mensaje && (
+        <p className="mensaje-producto">
+          {mensaje}
+        </p>
+      )}
 
       {carrito.length === 0 ? (
         <div className="carrito-vacio">
           <h3>El carrito está vacío</h3>
-          <p>Añade productos desde la tienda para poder finalizar tu compra.</p>
+
+          <p>
+            Añade productos desde la tienda para poder finalizar tu compra.
+          </p>
         </div>
       ) : (
         <section className="carrito-layout">
           <div className="carrito-lista">
-            {carrito.map((item) => (
-              <div key={item.cod_producto} className="carrito-item">
-                <div className="carrito-imagen">
-                  Producto
-                </div>
+            {carrito.map((item) => {
+              // Compatibilidad con productos antiguos y JOINs
+              const plataformaProducto =
+                item.nombre_plataforma || item.plataforma || '';
 
-                <div className="carrito-info">
-                  <h3>{item.nombre_producto}</h3>
-                  <p>Cantidad: {item.cantidad}</p>
-                  <p>Precio unitario: {item.precio_unitario} €</p>
-                </div>
+              // Calcula subtotal individual
+              const subtotal =
+                Number(item.precio_unitario) * Number(item.cantidad);
 
-                <div className="carrito-subtotal">
-                  <p>
-                    {(Number(item.precio_unitario) * Number(item.cantidad)).toFixed(2)} €
-                  </p>
+              return (
+                <div
+                  key={item.cod_producto}
+                  className="carrito-item"
+                >
+                  <div className="carrito-imagen">
+                    <img
+                      src={obtenerImagenProducto(plataformaProducto)}
+                      alt={item.nombre_producto}
+                      className="carrito-img"
+                    />
+                  </div>
+
+                  <div className="carrito-info">
+                    <h3>{item.nombre_producto}</h3>
+
+                    {plataformaProducto && (
+                      <p>
+                        Plataforma: {plataformaProducto}
+                      </p>
+                    )}
+
+                    <p>Cantidad: {item.cantidad}</p>
+
+                    <p>
+                      Precio unitario:{' '}
+                      {item.precio_unitario} €
+                    </p>
+                  </div>
+
+                  <div className="carrito-subtotal">
+                    <p>{subtotal.toFixed(2)} €</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <aside className="carrito-resumen">
@@ -142,7 +178,10 @@ function Carrito() {
 
             <div className="resumen-linea total">
               <span>Total</span>
-              <span>{totalCarrito.toFixed(2)} €</span>
+
+              <span>
+                {totalCarrito.toFixed(2)} €
+              </span>
             </div>
 
             <button

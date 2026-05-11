@@ -5,12 +5,19 @@ import obtenerImagenProducto from '../utils/obtenerImagenProducto';
 
 // Página de catálogo de productos con filtros, búsqueda e imágenes
 function Tienda() {
+  // Lista de productos obtenidos desde la API
   const [productos, setProductos] = useState([]);
+
+  // Lista de plataformas obtenidas desde la base de datos
+  const [plataformas, setPlataformas] = useState([]);
+
+  // Mensaje de error o estado
   const [mensaje, setMensaje] = useState('');
 
   // Permite leer parámetros de la URL
   const [searchParams] = useSearchParams();
 
+  // Estado de los filtros de la tienda
   const [filtros, setFiltros] = useState({
     busqueda: '',
     plataforma: searchParams.get('plataforma') || '',
@@ -18,20 +25,39 @@ function Tienda() {
     precioMaximo: '',
   });
 
+  // Obtiene los productos desde el backend
+  const obtenerProductos = async () => {
+    try {
+      const res = await api.get('/productos');
+      setProductos(res.data);
+    } catch (error) {
+      console.error(error);
+      setMensaje('Error al cargar productos');
+    }
+  };
+
+  // Obtiene las plataformas desde el backend
+  const obtenerPlataformas = async () => {
+    try {
+      const res = await api.get('/plataformas');
+      setPlataformas(res.data);
+    } catch (error) {
+      console.error(error);
+      setMensaje('Error al cargar plataformas');
+    }
+  };
+
+  // Carga productos y plataformas al abrir la tienda
   useEffect(() => {
-    const obtenerProductos = async () => {
-      try {
-        const res = await api.get('/productos');
-        setProductos(res.data);
-      } catch (error) {
-        console.error(error);
-        setMensaje('Error al cargar productos');
-      }
+    const cargarDatos = async () => {
+      await obtenerProductos();
+      await obtenerPlataformas();
     };
 
-    obtenerProductos();
+    cargarDatos();
   }, []);
 
+  // Actualiza el estado de filtros cuando el usuario escribe o selecciona opciones
   const manejarFiltro = (e) => {
     setFiltros({
       ...filtros,
@@ -39,6 +65,7 @@ function Tienda() {
     });
   };
 
+  // Limpia todos los filtros aplicados
   const limpiarFiltros = () => {
     setFiltros({
       busqueda: '',
@@ -48,14 +75,18 @@ function Tienda() {
     });
   };
 
+  // Filtra los productos según búsqueda, plataforma, tipo y precio máximo
   const productosFiltrados = productos.filter((producto) => {
+    const plataformaProducto =
+      producto.nombre_plataforma || producto.plataforma || '';
+
     const coincideBusqueda = producto.nombre_producto
       .toLowerCase()
       .includes(filtros.busqueda.toLowerCase());
 
     const coincidePlataforma =
       !filtros.plataforma ||
-      producto.plataforma === filtros.plataforma;
+      plataformaProducto === filtros.plataforma;
 
     const coincideTipo =
       !filtros.tipo_producto ||
@@ -110,10 +141,15 @@ function Tienda() {
             onChange={manejarFiltro}
           >
             <option value="">Todas</option>
-            <option value="Nintendo">Nintendo</option>
-            <option value="PlayStation">PlayStation</option>
-            <option value="Xbox">Xbox</option>
-            <option value="PC">PC</option>
+
+            {plataformas.map((plataforma) => (
+              <option
+                key={plataforma.cod_plataforma}
+                value={plataforma.nombre_plataforma}
+              >
+                {plataforma.nombre_plataforma}
+              </option>
+            ))}
           </select>
 
           <label>Tipo</label>
@@ -145,46 +181,54 @@ function Tienda() {
         </aside>
 
         <div className="productos-grid">
-          {productosFiltrados.map((producto) => (
-            <article key={producto.cod_producto} className="producto-card">
-              <div className="producto-imagen-contenedor">
-                <img
-                  src={obtenerImagenProducto(producto.plataforma)}
-                  alt={producto.nombre_producto}
-                  className="producto-imagen"
-                />
+          {productosFiltrados.map((producto) => {
+            const plataformaProducto =
+              producto.nombre_plataforma || producto.plataforma || '';
 
-                <span className="producto-badge-plataforma">
-                  {producto.plataforma}
-                </span>
-              </div>
+            return (
+              <article
+                key={producto.cod_producto}
+                className="producto-card"
+              >
+                <div className="producto-imagen-contenedor">
+                  <img
+                    src={obtenerImagenProducto(plataformaProducto)}
+                    alt={producto.nombre_producto}
+                    className="producto-imagen"
+                  />
 
-              <div className="producto-card-contenido">
-                <span className="producto-tipo">
-                  {producto.tipo_producto}
-                </span>
-
-                <h3>{producto.nombre_producto}</h3>
-
-                <p className="descripcion">
-                  {producto.descripcion_producto}
-                </p>
-
-                <div className="producto-card-footer">
-                  <p className="precio">
-                    {producto.precio} €
-                  </p>
+                  <span className="producto-badge-plataforma">
+                    {plataformaProducto}
+                  </span>
                 </div>
 
-                <Link
-                  to={`/producto/${producto.cod_producto}`}
-                  className="btn-carrito"
-                >
-                  Ver detalle
-                </Link>
-              </div>
-            </article>
-          ))}
+                <div className="producto-card-contenido">
+                  <span className="producto-tipo">
+                    {producto.tipo_producto}
+                  </span>
+
+                  <h3>{producto.nombre_producto}</h3>
+
+                  <p className="descripcion">
+                    {producto.descripcion_producto}
+                  </p>
+
+                  <div className="producto-card-footer">
+                    <p className="precio">
+                      {producto.precio} €
+                    </p>
+                  </div>
+
+                  <Link
+                    to={`/producto/${producto.cod_producto}`}
+                    className="btn-carrito"
+                  >
+                    Ver detalle
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
 
           {productosFiltrados.length === 0 && (
             <div className="sin-resultados">

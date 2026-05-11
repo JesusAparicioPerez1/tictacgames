@@ -9,27 +9,41 @@ function Home() {
   // Producto destacado mostrado en el banner promocional
   const [productoDestacado, setProductoDestacado] = useState(null);
 
-  // Cargar producto destacado
+  // Lista de plataformas disponibles
+  const [plataformas, setPlataformas] = useState([]);
+
+  // Cargar producto destacado y plataformas
   useEffect(() => {
-    const cargarProductoDestacado = async () => {
+    const cargarDatos = async () => {
       try {
-        const res = await api.get('/productos/destacado');
-        setProductoDestacado(res.data);
+        // Obtener producto destacado
+        const resProducto = await api.get('/productos/destacado');
+
+        setProductoDestacado(resProducto.data);
+
+        // Obtener plataformas desde la base de datos
+        const resPlataformas = await api.get('/plataformas');
+
+        setPlataformas(resPlataformas.data);
       } catch (error) {
         console.error(error);
       }
     };
 
-    cargarProductoDestacado();
+    cargarDatos();
   }, []);
+
+  // Compatibilidad con consultas antiguas y JOINs
+  const plataformaProducto =
+    productoDestacado?.nombre_plataforma ||
+    productoDestacado?.plataforma ||
+    '';
 
   return (
     <main className="home">
-
       {/* HERO PRINCIPAL */}
       <section className="home-hero">
         <div className="home-hero-texto">
-
           <h1>TicTac Games</h1>
 
           <p>
@@ -43,17 +57,14 @@ function Home() {
           >
             Ver catálogo
           </Link>
-
         </div>
       </section>
 
       {/* CATEGORÍAS */}
       <section className="home-seccion">
-
         <h2>Explora nuestras categorías</h2>
 
         <div className="home-categorias">
-
           <Link
             to="/tienda?tipo=videojuego"
             className="home-card"
@@ -86,23 +97,20 @@ function Home() {
               Compra saldo y suscripciones digitales.
             </p>
           </Link>
-
         </div>
       </section>
 
       {/* BANNER PRODUCTO DESTACADO */}
       {productoDestacado && (
         <section className="home-banner">
-
           <div className="home-banner-imagen">
             <img
-              src={obtenerImagenProducto(productoDestacado.plataforma)}
+              src={obtenerImagenProducto(plataformaProducto)}
               alt={productoDestacado.nombre_producto}
             />
           </div>
 
           <div className="home-banner-info">
-
             <p className="home-banner-tag">
               ¡NOVEDAD!
             </p>
@@ -117,7 +125,6 @@ function Home() {
             </p>
 
             <div className="home-banner-bottom">
-
               <span>
                 {productoDestacado.precio} €
               </span>
@@ -128,40 +135,26 @@ function Home() {
               >
                 Ver detalle
               </Link>
-
             </div>
-
           </div>
-
         </section>
       )}
 
       {/* PLATAFORMAS */}
       <section className="home-seccion">
-
         <h2>Plataformas disponibles</h2>
 
         <div className="home-plataformas">
-
-          <Link to="/tienda?plataforma=Nintendo">
-            Nintendo
-          </Link>
-
-          <Link to="/tienda?plataforma=PlayStation">
-            PlayStation
-          </Link>
-
-          <Link to="/tienda?plataforma=Xbox">
-            Xbox
-          </Link>
-
-          <Link to="/tienda?plataforma=PC">
-            PC
-          </Link>
-
+          {plataformas.map((plataforma) => (
+            <Link
+              key={plataforma.cod_plataforma}
+              to={`/tienda?plataforma=${plataforma.nombre_plataforma}`}
+            >
+              {plataforma.nombre_plataforma}
+            </Link>
+          ))}
         </div>
       </section>
-
     </main>
   );
 }

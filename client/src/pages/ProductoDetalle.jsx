@@ -15,9 +15,13 @@ function ProductoDetalle() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Producto seleccionado
   const [producto, setProducto] = useState(null);
+
+  // Mensaje informativo o de error
   const [mensaje, setMensaje] = useState('');
 
+  // Carga el producto concreto según el id recibido por la URL
   useEffect(() => {
     const obtenerProducto = async () => {
       try {
@@ -32,9 +36,11 @@ function ProductoDetalle() {
     obtenerProducto();
   }, [id]);
 
+  // Añade el producto actual al carrito del usuario autenticado
   const agregarAlCarrito = async () => {
     const token = localStorage.getItem('token');
 
+    // Si no hay token, se abre el modal de login
     if (!token) {
       window.dispatchEvent(
         new CustomEvent('abrirAuthModal', {
@@ -73,9 +79,15 @@ function ProductoDetalle() {
     }
   };
 
+  // Mientras no se haya cargado el producto, se muestra un mensaje de carga
   if (!producto) {
     return <p>Cargando producto...</p>;
   }
+
+  // Se obtiene el nombre de la plataforma de forma compatible
+  // con productos antiguos y con consultas que usen JOIN.
+  const plataformaProducto =
+    producto.nombre_plataforma || producto.plataforma || '';
 
   return (
     <main>
@@ -89,7 +101,7 @@ function ProductoDetalle() {
       <section className="detalle-producto">
         <div className="detalle-imagen">
           <img
-            src={obtenerImagenProducto(producto.plataforma)}
+            src={obtenerImagenProducto(plataformaProducto)}
             alt={producto.nombre_producto}
             className="detalle-img"
           />
@@ -103,7 +115,7 @@ function ProductoDetalle() {
           <h1>{producto.nombre_producto}</h1>
 
           <p className="detalle-plataforma">
-            Plataforma: {producto.plataforma}
+            Plataforma: {plataformaProducto}
           </p>
 
           <div className="detalle-divider"></div>

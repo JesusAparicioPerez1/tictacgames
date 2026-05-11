@@ -2,22 +2,45 @@ import { useState } from 'react';
 import Swal from 'sweetalert2';
 import api from '../services/api';
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+import { Bar } from 'react-chartjs-2';
+
+import {
+  FaUsers,
+  FaBoxOpen,
+  FaGamepad,
+  FaChartBar,
+} from 'react-icons/fa';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend
+);
+
 // Panel de administración
 function Admin() {
-  // =========================
-  // ESTADOS GENERALES
-  // =========================
-
   const [usuarios, setUsuarios] = useState([]);
   const [productos, setProductos] = useState([]);
   const [plataformas, setPlataformas] = useState([]);
 
+  const [estadisticasVentas, setEstadisticasVentas] = useState({
+    ventasPorPlataforma: [],
+    ventasPorVendedor: [],
+  });
+
   const [mensaje, setMensaje] = useState('');
   const [seccionActiva, setSeccionActiva] = useState('usuarios');
-
-  // =========================
-  // MODAL USUARIOS
-  // =========================
 
   const [modalUsuarioAbierto, setModalUsuarioAbierto] = useState(false);
 
@@ -27,10 +50,6 @@ function Admin() {
     contrasena: '',
     cod_rol: 3,
   });
-
-  // =========================
-  // MODAL PRODUCTOS
-  // =========================
 
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
   const [productoEditando, setProductoEditando] = useState(null);
@@ -44,25 +63,59 @@ function Admin() {
     plataforma: '',
   });
 
-  // =========================
-  // MODAL DESTACADO
-  // =========================
-
   const [modalDestacadoAbierto, setModalDestacadoAbierto] = useState(false);
   const [productoDestacado, setProductoDestacado] = useState(null);
   const [textoPromocion, setTextoPromocion] = useState('');
-
-  // =========================
-  // MODAL PLATAFORMAS
-  // =========================
 
   const [modalPlataformaAbierto, setModalPlataformaAbierto] = useState(false);
   const [plataformaEditando, setPlataformaEditando] = useState(null);
   const [nombrePlataforma, setNombrePlataforma] = useState('');
 
-  // =========================
-  // SWEETALERT
-  // =========================
+  const coloresPlataformas = {
+    PlayStation: '#006FCD',
+    Xbox: '#107C10',
+    Nintendo: '#E60012',
+    PC: '#FF8C00',
+  };
+
+  const datosVentasPorPlataforma = {
+    labels: estadisticasVentas.ventasPorPlataforma.map(
+      (item) => item.plataforma
+    ),
+    datasets: [
+      {
+        label: 'Ventas (€)',
+        data: estadisticasVentas.ventasPorPlataforma.map(
+          (item) => Number(item.total_vendido)
+        ),
+        backgroundColor: estadisticasVentas.ventasPorPlataforma.map(
+          (item) => coloresPlataformas[item.plataforma] || '#888888'
+        ),
+      },
+    ],
+  };
+
+  const datosVentasPorVendedor = {
+    labels: estadisticasVentas.ventasPorVendedor.map(
+      (item) => item.vendedor
+    ),
+    datasets: [
+      {
+        label: 'Ventas (€)',
+        data: estadisticasVentas.ventasPorVendedor.map(
+          (item) => Number(item.total_vendido)
+        ),
+        backgroundColor: [
+          '#00d084',
+          '#36a2eb',
+          '#ff6384',
+          '#ffce56',
+          '#9966ff',
+          '#ff9f40',
+        ],
+      },
+    ],
+  };
 
   const mostrarExito = (texto) => {
     Swal.fire({
@@ -85,10 +138,6 @@ function Admin() {
       color: '#ffffff',
     });
   };
-
-  // =========================
-  // USUARIOS
-  // =========================
 
   const obtenerUsuarios = async () => {
     try {
@@ -247,10 +296,6 @@ function Admin() {
       );
     }
   };
-
-  // =========================
-  // PRODUCTOS
-  // =========================
 
   const obtenerProductos = async () => {
     try {
@@ -411,10 +456,6 @@ function Admin() {
     }
   };
 
-  // =========================
-  // PLATAFORMAS
-  // =========================
-
   const obtenerPlataformas = async () => {
     try {
       const res = await api.get('/plataformas');
@@ -528,9 +569,22 @@ function Admin() {
     }
   };
 
-  // =========================
-  // CAMBIO DE PESTAÑAS
-  // =========================
+  const obtenerEstadisticasVentas = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await api.get('/pedidos/estadisticas', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setEstadisticasVentas(res.data);
+    } catch (error) {
+      console.error(error);
+      mostrarError('Error al cargar estadísticas de ventas');
+    }
+  };
 
   const mostrarUsuarios = () => {
     setSeccionActiva('usuarios');
@@ -548,6 +602,11 @@ function Admin() {
     obtenerPlataformas();
   };
 
+  const mostrarVentas = () => {
+    setSeccionActiva('ventas');
+    obtenerEstadisticasVentas();
+  };
+
   return (
     <main>
       <h2>Panel de Administración</h2>
@@ -558,22 +617,28 @@ function Admin() {
         </p>
       )}
 
-      {/* TABS */}
       <div className="admin-tabs">
         <button onClick={mostrarUsuarios}>
-          Usuarios
+          <FaUsers />
+          <span>Usuarios</span>
         </button>
 
         <button onClick={mostrarProductos}>
-          Productos
+          <FaBoxOpen />
+          <span>Productos</span>
         </button>
 
         <button onClick={mostrarPlataformas}>
-          Plataformas
+          <FaGamepad />
+          <span>Plataformas</span>
+        </button>
+
+        <button onClick={mostrarVentas}>
+          <FaChartBar />
+          <span>Ventas</span>
         </button>
       </div>
 
-      {/* USUARIOS */}
       {seccionActiva === 'usuarios' && (
         <section>
           <div className="panel-cabecera">
@@ -592,10 +657,7 @@ function Admin() {
           )}
 
           {usuarios.map((u) => (
-            <div
-              key={u.cod_usuario}
-              className="panel-card"
-            >
+            <div key={u.cod_usuario} className="panel-card">
               <p>
                 <strong>{u.nombre}</strong>
               </p>
@@ -648,7 +710,6 @@ function Admin() {
         </section>
       )}
 
-      {/* PRODUCTOS */}
       {seccionActiva === 'productos' && (
         <section>
           {productos.length === 0 && (
@@ -656,10 +717,7 @@ function Admin() {
           )}
 
           {productos.map((p) => (
-            <div
-              key={p.cod_producto}
-              className="panel-card"
-            >
+            <div key={p.cod_producto} className="panel-card">
               <h4>{p.nombre_producto}</h4>
 
               <p>{p.descripcion_producto}</p>
@@ -698,7 +756,6 @@ function Admin() {
         </section>
       )}
 
-      {/* PLATAFORMAS */}
       {seccionActiva === 'plataformas' && (
         <section>
           <div className="panel-cabecera">
@@ -750,7 +807,41 @@ function Admin() {
         </section>
       )}
 
-      {/* MODAL USUARIO */}
+      {seccionActiva === 'ventas' && (
+        <section>
+          <div className="panel-cabecera">
+            <div>
+              <h3>Ventas</h3>
+              <p>
+                Consulta estadísticas reales de ventas realizadas en la tienda.
+              </p>
+            </div>
+          </div>
+
+          <div className="ventas-grid">
+            <div className="panel-card">
+              <h3>Ventas por plataforma</h3>
+
+              {estadisticasVentas.ventasPorPlataforma.length === 0 ? (
+                <p>No hay datos de ventas por plataforma.</p>
+              ) : (
+                <Bar data={datosVentasPorPlataforma} />
+              )}
+            </div>
+
+            <div className="panel-card">
+              <h3>Ventas por vendedor</h3>
+
+              {estadisticasVentas.ventasPorVendedor.length === 0 ? (
+                <p>No hay datos de ventas por vendedor.</p>
+              ) : (
+                <Bar data={datosVentasPorVendedor} />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {modalUsuarioAbierto && (
         <div className="modal-fondo">
           <div className="modal-contenido">
@@ -808,7 +899,6 @@ function Admin() {
         </div>
       )}
 
-      {/* MODAL EDITAR PRODUCTO */}
       {modalProductoAbierto && (
         <div className="modal-fondo">
           <div className="modal-contenido">
@@ -898,7 +988,6 @@ function Admin() {
         </div>
       )}
 
-      {/* MODAL PRODUCTO DESTACADO */}
       {modalDestacadoAbierto && (
         <div className="modal-fondo">
           <div className="modal-contenido">
@@ -934,7 +1023,6 @@ function Admin() {
         </div>
       )}
 
-      {/* MODAL PLATAFORMA */}
       {modalPlataformaAbierto && (
         <div className="modal-fondo">
           <div className="modal-contenido">
