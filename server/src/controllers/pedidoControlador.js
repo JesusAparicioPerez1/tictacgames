@@ -22,13 +22,13 @@ const listarPedidos = async (req, res) => {
       pedidos[fila.cod_pedido].productos.push({
         cod_producto: fila.cod_producto,
         nombre_producto: fila.nombre_producto,
+        plataforma: fila.plataforma,
         cantidad: fila.cantidad,
         precio_unitario: fila.precio_unitario,
       });
     });
 
     res.json(Object.values(pedidos));
-
   } catch (error) {
     res.status(500).json({
       mensaje: 'Error al obtener pedidos',
@@ -37,6 +37,28 @@ const listarPedidos = async (req, res) => {
   }
 };
 
+// Obtiene estadísticas de ventas para el panel de administración
+const obtenerEstadisticasVentas = async (req, res) => {
+  try {
+    const ventasPorPlataforma =
+      await pedidoModelo.obtenerVentasPorPlataforma();
+
+    const ventasPorVendedor =
+      await pedidoModelo.obtenerVentasPorVendedor();
+
+    res.json({
+      ventasPorPlataforma,
+      ventasPorVendedor,
+    });
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al obtener estadísticas de ventas',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   listarPedidos,
+  obtenerEstadisticasVentas,
 };
