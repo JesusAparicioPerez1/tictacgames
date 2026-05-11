@@ -33,10 +33,104 @@ function Carrito() {
     cargarCarrito();
   }, []);
 
+  // Calcula el número total de unidades del carrito
+  const totalUnidades = carrito.reduce((total, item) => {
+    return total + Number(item.cantidad);
+  }, 0);
+
   // Calcula el total del carrito
   const totalCarrito = carrito.reduce((total, item) => {
     return total + Number(item.precio_unitario) * Number(item.cantidad);
   }, 0);
+
+  // Actualiza la cantidad de un producto en backend y frontend
+  const actualizarCantidad = async (cod_producto, nuevaCantidad) => {
+    if (nuevaCantidad < 1) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await api.put(
+        `/carrito/${cod_producto}`,
+        {
+          cantidad: nuevaCantidad,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setCarrito(res.data.carrito);
+    } catch (error) {
+      console.error(error);
+
+      setMensaje(
+        error.response?.data?.mensaje ||
+          'Error al actualizar cantidad'
+      );
+    }
+  };
+
+  // Aumenta en 1 la cantidad de un producto
+  const aumentarCantidad = (item) => {
+    const nuevaCantidad = Number(item.cantidad) + 1;
+
+    actualizarCantidad(item.cod_producto, nuevaCantidad);
+  };
+
+  // Disminuye en 1 la cantidad de un producto
+  const disminuirCantidad = (item) => {
+    const nuevaCantidad = Number(item.cantidad) - 1;
+
+    if (nuevaCantidad < 1) {
+      return;
+    }
+
+    actualizarCantidad(item.cod_producto, nuevaCantidad);
+  };
+
+  // Elimina un producto del carrito
+  const eliminarDelCarrito = async (cod_producto) => {
+    const confirmacion = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar producto?',
+      text: 'El producto se quitará del carrito.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#555',
+      background: '#1e1e1e',
+      color: '#ffffff',
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await api.delete(`/carrito/${cod_producto}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setCarrito(res.data.carrito);
+    } catch (error) {
+      console.error(error);
+
+      setMensaje(
+        error.response?.data?.mensaje ||
+          'Error al eliminar producto del carrito'
+      );
+    }
+  };
 
   // Confirma el pedido y vacía el carrito
   const confirmarPedido = async () => {
@@ -122,11 +216,9 @@ function Carrito() {
         <section className="carrito-layout">
           <div className="carrito-lista">
             {carrito.map((item) => {
-              // Compatibilidad con productos antiguos y JOINs
               const plataformaProducto =
                 item.nombre_plataforma || item.plataforma || '';
 
-              // Calcula subtotal individual
               const subtotal =
                 Number(item.precio_unitario) * Number(item.cantidad);
 
@@ -152,12 +244,40 @@ function Carrito() {
                       </p>
                     )}
 
-                    <p>Cantidad: {item.cantidad}</p>
-
                     <p>
                       Precio unitario:{' '}
                       {item.precio_unitario} €
                     </p>
+
+                    <div className="carrito-controles">
+                      <button
+                        type="button"
+                        onClick={() => disminuirCantidad(item)}
+                      >
+                        -
+                      </button>
+
+                      <span>
+                        {item.cantidad}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => aumentarCantidad(item)}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn-eliminar-carrito"
+                      onClick={() =>
+                        eliminarDelCarrito(item.cod_producto)
+                      }
+                    >
+                      Eliminar
+                    </button>
                   </div>
 
                   <div className="carrito-subtotal">
@@ -173,7 +293,7 @@ function Carrito() {
 
             <div className="resumen-linea">
               <span>Productos</span>
-              <span>{carrito.length}</span>
+              <span>{totalUnidades}</span>
             </div>
 
             <div className="resumen-linea total">

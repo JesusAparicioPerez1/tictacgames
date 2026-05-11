@@ -89,6 +89,10 @@ function ProductoDetalle() {
   const plataformaProducto =
     producto.nombre_plataforma || producto.plataforma || '';
 
+  // Las tarjetas digitales no necesitan categoría.
+  const mostrarCategorias =
+    producto.tipo_producto !== 'tarjeta' && producto.categorias;
+
   return (
     <main>
       <button
@@ -117,6 +121,12 @@ function ProductoDetalle() {
           <p className="detalle-plataforma">
             Plataforma: {plataformaProducto}
           </p>
+
+          {mostrarCategorias && (
+            <p className="detalle-categoria">
+              Categoría: {producto.categorias}
+            </p>
+          )}
 
           <div className="detalle-divider"></div>
 

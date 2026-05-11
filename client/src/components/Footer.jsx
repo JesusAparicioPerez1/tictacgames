@@ -37,7 +37,7 @@ function Footer() {
           <Link to="/tienda">Tienda</Link>
 
           <button type="button" onClick={abrirLogin}>
-            Login
+            Iniciar sesión
           </button>
 
           <button type="button" onClick={abrirRegistro}>
