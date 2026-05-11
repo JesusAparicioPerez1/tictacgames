@@ -187,14 +187,6 @@ function AuthModal({
             />
 
             <input
-              type="text"
-              name="apellido"
-              value={registroForm.apellido}
-              onChange={manejarRegistroChange}
-              placeholder="Apellido"
-            />
-
-            <input
               type="email"
               name="correo"
               value={registroForm.correo}
