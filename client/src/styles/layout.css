@@ -70,13 +70,32 @@ a {
 /* ========================= */
 
 .navbar-logo a,
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  text-decoration: none;
+}
+
+.navbar-logo-img {
+  width: 42px;
+  height: 42px;
+
+  object-fit: contain;
+
+  filter: drop-shadow(
+    0 0 8px rgba(0, 208, 132, 0.25)
+  );
+}
+
 .navbar-logo span {
   font-size: 24px;
   font-weight: bold;
 
   color: white;
 
-  text-decoration: none;
+  letter-spacing: 0.4px;
 }
 
 /* ========================= */
@@ -144,8 +163,12 @@ button {
     gap: 16px;
   }
 
-  .navbar-logo a,
   .navbar-logo span {
     font-size: 22px;
+  }
+
+  .navbar-logo-img {
+    width: 38px;
+    height: 38px;
   }
 }
