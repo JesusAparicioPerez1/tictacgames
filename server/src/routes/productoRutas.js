@@ -8,6 +8,18 @@ const router = express.Router();
 // Público: listar productos
 router.get('/', productoControlador.listarProductos);
 
+// Público: productos más vendidos
+router.get(
+  '/mas-vendidos',
+  productoControlador.obtenerMasVendidos
+);
+
+// Producto destacado para Home
+router.get(
+  '/destacado',
+  productoControlador.obtenerProductoDestacado
+);
+
 // Privado: crear producto (admin o vendedor)
 router.post(
   '/',
@@ -45,12 +57,6 @@ router.get(
   '/mis-productos',
   verificarToken,
   productoControlador.listarMisProductos
-);
-
-// Producto destacado para Home
-router.get(
-  '/destacado',
-  productoControlador.obtenerProductoDestacado
 );
 
 // Público: obtener detalle de un producto concreto

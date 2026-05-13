@@ -62,6 +62,21 @@ const listarProductos = async (req, res) => {
   }
 };
 
+// Obtener productos más vendidos
+const obtenerMasVendidos = async (req, res) => {
+  try {
+    const productos =
+      await productoModelo.obtenerProductosMasVendidos();
+
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: 'Error al obtener productos más vendidos',
+      error: error.message,
+    });
+  }
+};
+
 // Editar producto
 const editarProducto = async (req, res) => {
   try {
@@ -262,6 +277,7 @@ const actualizarProductoDestacado = async (req, res) => {
 module.exports = {
   crearProducto,
   listarProductos,
+  obtenerMasVendidos,
   editarProducto,
   eliminarProducto,
   listarMisProductos,

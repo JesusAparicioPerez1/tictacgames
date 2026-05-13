@@ -1,7 +1,6 @@
 const conexionBD = require('../config/conexionBD');
 
-// Obtiene todos los productos con el nombre de la plataforma,
-// el vendedor y sus categorías asociadas
+// Obtiene todos los productos con plataforma, vendedor y categorías
 const obtenerProductos = async () => {
   const [filas] = await conexionBD.query(`
     SELECT
@@ -25,8 +24,7 @@ const obtenerProductos = async () => {
   return filas;
 };
 
-// Obtiene un producto por su ID con el nombre de la plataforma,
-// el vendedor y sus categorías asociadas
+// Obtiene un producto por su ID
 const obtenerProductoPorId = async (cod_producto) => {
   const [filas] = await conexionBD.query(
     `
@@ -53,10 +51,10 @@ const obtenerProductoPorId = async (cod_producto) => {
   return filas[0];
 };
 
-// Alias para mantener compatibilidad con controladores antiguos
+// Alias para mantener compatibilidad
 const obtenerProductoPorCodigo = obtenerProductoPorId;
 
-// Obtiene los productos creados por un vendedor concreto
+// Obtiene productos de un vendedor
 const obtenerProductosPorUsuario = async (cod_usuario) => {
   const [filas] = await conexionBD.query(
     `
@@ -81,7 +79,27 @@ const obtenerProductosPorUsuario = async (cod_usuario) => {
   return filas;
 };
 
-// Crea un nuevo producto
+// Obtiene los productos más vendidos
+const obtenerProductosMasVendidos = async () => {
+  const [filas] = await conexionBD.query(`
+    SELECT
+      p.*,
+      pl.nombre_plataforma,
+      SUM(lp.cantidad) AS total_vendido
+    FROM producto p
+    LEFT JOIN plataforma pl
+      ON p.cod_plataforma = pl.cod_plataforma
+    LEFT JOIN linea_pedido lp
+      ON p.cod_producto = lp.cod_producto
+    GROUP BY p.cod_producto
+    ORDER BY total_vendido DESC
+    LIMIT 3
+  `);
+
+  return filas;
+};
+
+// Crear producto
 const crearProducto = async ({
   nombre_producto,
   descripcion_producto,
@@ -119,7 +137,7 @@ const crearProducto = async ({
   return resultado.insertId;
 };
 
-// Edita un producto existente
+// Editar producto
 const editarProducto = async (
   cod_producto,
   {
@@ -157,10 +175,10 @@ const editarProducto = async (
   return resultado.affectedRows;
 };
 
-// Alias para mantener compatibilidad con controladores antiguos
+// Alias compatibilidad
 const actualizarProducto = editarProducto;
 
-// Elimina un producto
+// Eliminar producto
 const eliminarProducto = async (cod_producto) => {
   const [resultado] = await conexionBD.query(
     `
@@ -173,29 +191,23 @@ const eliminarProducto = async (cod_producto) => {
   return resultado.affectedRows;
 };
 
-// Obtiene el producto destacado
+// Producto destacado
 const obtenerProductoDestacado = async () => {
   const [filas] = await conexionBD.query(`
     SELECT
       p.*,
-      pl.nombre_plataforma,
-      GROUP_CONCAT(c.nombre_categoria SEPARATOR ', ') AS categorias
+      pl.nombre_plataforma
     FROM producto p
     LEFT JOIN plataforma pl
       ON p.cod_plataforma = pl.cod_plataforma
-    LEFT JOIN producto_categoria pc
-      ON p.cod_producto = pc.cod_producto
-    LEFT JOIN categoria c
-      ON pc.cod_categoria = c.cod_categoria
     WHERE p.destacado = true
-    GROUP BY p.cod_producto
     LIMIT 1
   `);
 
   return filas[0];
 };
 
-// Actualiza producto destacado
+// Actualizar destacado
 const actualizarProductoDestacado = async (
   cod_producto,
   destacado,
@@ -225,6 +237,7 @@ module.exports = {
   obtenerProductoPorId,
   obtenerProductoPorCodigo,
   obtenerProductosPorUsuario,
+  obtenerProductosMasVendidos,
   crearProducto,
   editarProducto,
   actualizarProducto,

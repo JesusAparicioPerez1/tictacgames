@@ -9,21 +9,26 @@ function Home() {
   // Producto destacado mostrado en el banner promocional
   const [productoDestacado, setProductoDestacado] = useState(null);
 
+  // Productos más vendidos
+  const [masVendidos, setMasVendidos] = useState([]);
+
   // Lista de plataformas disponibles
   const [plataformas, setPlataformas] = useState([]);
 
-  // Cargar producto destacado y plataformas
+  // Cargar producto destacado, más vendidos y plataformas
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         // Obtener producto destacado
         const resProducto = await api.get('/productos/destacado');
-
         setProductoDestacado(resProducto.data);
+
+        // Obtener productos más vendidos
+        const resMasVendidos = await api.get('/productos/mas-vendidos');
+        setMasVendidos(resMasVendidos.data);
 
         // Obtener plataformas desde la base de datos
         const resPlataformas = await api.get('/plataformas');
-
         setPlataformas(resPlataformas.data);
       } catch (error) {
         console.error(error);
@@ -136,6 +141,46 @@ function Home() {
                 Ver detalle
               </Link>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* MÁS VENDIDOS */}
+      {masVendidos.length > 0 && (
+        <section className="home-seccion">
+          <h2>¡Los más buscados!</h2>
+
+          <div className="home-categorias">
+            {masVendidos.map((producto) => {
+              const plataformaMasVendido =
+                producto.nombre_plataforma ||
+                producto.plataforma ||
+                '';
+
+              return (
+                <Link
+                  key={producto.cod_producto}
+                  to={`/producto/${producto.cod_producto}`}
+                  className="home-card home-masvendido-card"
+                >
+                  <img
+                    src={obtenerImagenProducto(plataformaMasVendido)}
+                    alt={producto.nombre_producto}
+                    className="home-masvendidos-img"
+                  />
+
+                  <h3>{producto.nombre_producto}</h3>
+
+                  <p>
+                    Plataforma: {plataformaMasVendido}
+                  </p>
+
+                  <strong>
+                    {producto.precio} €
+                  </strong>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
