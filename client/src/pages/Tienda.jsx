@@ -28,64 +28,94 @@ function Tienda() {
     precioMaximo: '',
   });
 
-  const obtenerProductos = async () => {
-    try {
-      const res = await api.get('/productos');
-
-      setProductos(res.data);
-
-      const categoriasUnicas = [
-        ...new Set(
-          res.data
-            .filter((producto) => producto.tipo_producto !== 'tarjeta')
-            .flatMap((producto) =>
-              producto.categorias
-                ? producto.categorias.split(',').map((cat) => cat.trim())
-                : []
-            )
-            .filter((categoria) => categoria !== '')
-        ),
-      ];
-
-      setCategorias(categoriasUnicas);
-    } catch (error) {
-      console.error(error);
-      setMensaje('Error al cargar productos');
-    }
+  // Normaliza textos para evitar problemas con mayúsculas, espacios o acentos
+  const normalizarTexto = (texto) => {
+    return String(texto || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   };
 
-  const obtenerPlataformas = async () => {
-    try {
-      const res = await api.get('/plataformas');
-      setPlataformas(res.data);
-    } catch (error) {
-      console.error(error);
-      setMensaje('Error al cargar plataformas');
+  // Convierte el campo categorias en un array limpio
+  const obtenerCategoriasProducto = (producto) => {
+    if (!producto.categorias) {
+      return [];
     }
+
+    return String(producto.categorias)
+      .split(',')
+      .map((categoria) => categoria.trim())
+      .filter((categoria) => categoria !== '');
   };
 
+  // Carga productos y plataformas al abrir la tienda
   useEffect(() => {
-    const cargarDatos = async () => {
-      await obtenerProductos();
-      await obtenerPlataformas();
+    const obtenerProductos = async () => {
+      try {
+        const res = await api.get('/productos');
+
+        setProductos(res.data);
+
+        const categoriasUnicas = [
+          ...new Set(
+            res.data
+              .filter(
+                (producto) =>
+                  normalizarTexto(producto.tipo_producto) !== 'tarjeta'
+              )
+              .flatMap((producto) =>
+                obtenerCategoriasProducto(producto)
+              )
+              .filter((categoria) => categoria !== '')
+          ),
+        ];
+
+        setCategorias(
+          categoriasUnicas.sort((a, b) =>
+            a.localeCompare(b)
+          )
+        );
+      } catch (error) {
+        console.error(error);
+        setMensaje('Error al cargar productos');
+      }
     };
 
-    cargarDatos();
+    const obtenerPlataformas = async () => {
+      try {
+        const res = await api.get('/plataformas');
+
+        setPlataformas(res.data);
+      } catch (error) {
+        console.error(error);
+        setMensaje('Error al cargar plataformas');
+      }
+    };
+
+    obtenerProductos();
+    obtenerPlataformas();
   }, []);
 
+  // Actualiza los filtros
   const manejarFiltro = (e) => {
     const { name, value } = e.target;
 
-    setFiltros({
-      ...filtros,
+    setFiltros((filtrosActuales) => ({
+      ...filtrosActuales,
       [name]: value,
+
+      // Si se seleccionan tarjetas, se limpia la categoría
       categoria:
         name === 'tipo_producto' && value === 'tarjeta'
           ? ''
-          : filtros.categoria,
-    });
+          : name === 'categoria'
+            ? value
+            : filtrosActuales.categoria,
+    }));
   };
 
+  // Limpia todos los filtros
   const limpiarFiltros = () => {
     setFiltros({
       busqueda: '',
@@ -96,6 +126,7 @@ function Tienda() {
     });
   };
 
+  // Añade un producto al carrito
   const agregarAlCarrito = async (producto, e) => {
     e.stopPropagation();
 
@@ -139,31 +170,35 @@ function Tienda() {
     }
   };
 
+  // Filtra productos por búsqueda, plataforma, tipo, categoría y precio
   const productosFiltrados = productos.filter((producto) => {
     const plataformaProducto =
       producto.nombre_plataforma || producto.plataforma || '';
 
-    const categoriasProducto = producto.categorias || '';
+    const categoriasProducto =
+      obtenerCategoriasProducto(producto);
 
-    const coincideBusqueda = String(producto.nombre_producto)
-      .toLowerCase()
-      .includes(filtros.busqueda.toLowerCase());
+    const coincideBusqueda = normalizarTexto(
+      producto.nombre_producto
+    ).includes(normalizarTexto(filtros.busqueda));
 
     const coincidePlataforma =
       !filtros.plataforma ||
-      plataformaProducto === filtros.plataforma;
+      normalizarTexto(plataformaProducto) ===
+        normalizarTexto(filtros.plataforma);
 
     const coincideTipo =
       !filtros.tipo_producto ||
-      String(producto.tipo_producto).trim().toLowerCase() ===
-        String(filtros.tipo_producto).trim().toLowerCase();
+      normalizarTexto(producto.tipo_producto) ===
+        normalizarTexto(filtros.tipo_producto);
 
     const coincideCategoria =
-      producto.tipo_producto === 'tarjeta' ||
       !filtros.categoria ||
-      categoriasProducto
-        .toLowerCase()
-        .includes(filtros.categoria.toLowerCase());
+      categoriasProducto.some(
+        (categoria) =>
+          normalizarTexto(categoria) ===
+          normalizarTexto(filtros.categoria)
+      );
 
     const coincidePrecio =
       !filtros.precioMaximo ||
@@ -253,9 +288,9 @@ function Tienda() {
               >
                 <option value="">Todas</option>
 
-                {categorias.map((categoria) => (
+                {categorias.map((categoria, index) => (
                   <option
-                    key={categoria}
+                    key={`${categoria}-${index}`}
                     value={categoria}
                   >
                     {categoria}
