@@ -26,7 +26,7 @@ function Vendedor() {
     precio: '',
     stock: '',
     tipo_producto: '',
-    plataforma: '',
+    cod_plataforma: '',
   });
 
   // Muestra alerta de éxito
@@ -105,7 +105,7 @@ function Vendedor() {
       precio: '',
       stock: '',
       tipo_producto: '',
-      plataforma: '',
+      cod_plataforma: '',
     });
 
     setModalAbierto(true);
@@ -121,7 +121,7 @@ function Vendedor() {
       precio: producto.precio || '',
       stock: producto.stock || '',
       tipo_producto: producto.tipo_producto || '',
-      plataforma: producto.plataforma || '',
+      cod_plataforma: producto.cod_plataforma || '',
     });
 
     setModalAbierto(true);
@@ -138,7 +138,7 @@ function Vendedor() {
       precio: '',
       stock: '',
       tipo_producto: '',
-      plataforma: '',
+      cod_plataforma: '',
     });
   };
 
@@ -157,11 +157,14 @@ function Vendedor() {
     try {
       const token = localStorage.getItem('token');
 
-      // Se prepara el producto convirtiendo precio y stock a número
+      // Se prepara el producto convirtiendo precio, stock y plataforma a número
       const producto = {
-        ...form,
+        nombre_producto: form.nombre_producto,
+        descripcion_producto: form.descripcion_producto,
         precio: Number(form.precio),
         stock: Number(form.stock),
+        tipo_producto: form.tipo_producto,
+        cod_plataforma: Number(form.cod_plataforma),
       };
 
       // Si existe productoEditando, se actualiza un producto existente
@@ -263,7 +266,10 @@ function Vendedor() {
 
               <p>Precio: {producto.precio} €</p>
               <p>Stock: {producto.stock}</p>
-              <p>Plataforma: {producto.plataforma}</p>
+              <p>
+                Plataforma:{' '}
+                {producto.nombre_plataforma || producto.plataforma}
+              </p>
               <p>Tipo: {producto.tipo_producto}</p>
 
               <button onClick={() => abrirModalEditar(producto)}>
@@ -344,8 +350,8 @@ function Vendedor() {
               </select>
 
               <select
-                name="plataforma"
-                value={form.plataforma}
+                name="cod_plataforma"
+                value={form.cod_plataforma}
                 onChange={handleChange}
                 required
               >
@@ -354,7 +360,7 @@ function Vendedor() {
                 {plataformas.map((plataforma) => (
                   <option
                     key={plataforma.cod_plataforma}
-                    value={plataforma.nombre_plataforma}
+                    value={plataforma.cod_plataforma}
                   >
                     {plataforma.nombre_plataforma}
                   </option>
